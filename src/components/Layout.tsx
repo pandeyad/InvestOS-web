@@ -61,7 +61,7 @@ export function Layout() {
             </span>
           </span>
           <div className="leading-[1.05]">
-            <div className="text-[18px] font-bold tracking-tight">InvestOS</div>
+            <div className="text-[18px] font-bold tracking-tight">WIB</div>
             <div className="text-[11px] text-on-surface-variant tracking-wide">trading journal</div>
           </div>
         </Link>
