@@ -1,7 +1,55 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
-  darkMode: "class",
-  theme: { extend: {} },
+  darkMode: ["selector", '[data-theme="dark"]'],
+  theme: {
+    extend: {
+      colors: {
+        // Map semantic tokens onto CSS vars so dark/light cascade via [data-theme]
+        primary: "var(--md-primary)",
+        "on-primary": "var(--md-on-primary)",
+        "primary-container": "var(--md-primary-container)",
+        "on-primary-container": "var(--md-on-primary-container)",
+        secondary: "var(--md-secondary)",
+        "on-secondary": "var(--md-on-secondary)",
+        "secondary-container": "var(--md-secondary-container)",
+        "on-secondary-container": "var(--md-on-secondary-container)",
+        tertiary: "var(--md-tertiary)",
+        "on-tertiary": "var(--md-on-tertiary)",
+        "tertiary-container": "var(--md-tertiary-container)",
+        "on-tertiary-container": "var(--md-on-tertiary-container)",
+        error: "var(--md-error)",
+        "on-error": "var(--md-on-error)",
+        "error-container": "var(--md-error-container)",
+        "on-error-container": "var(--md-on-error-container)",
+        success: "var(--md-success)",
+        "success-container": "var(--md-success-container)",
+        surface: "var(--md-surface)",
+        "on-surface": "var(--md-on-surface)",
+        "surface-variant": "var(--md-surface-variant)",
+        "on-surface-variant": "var(--md-on-surface-variant)",
+        "surface-container-lowest": "var(--md-surface-container-lowest)",
+        "surface-container-low": "var(--md-surface-container-low)",
+        "surface-container": "var(--md-surface-container)",
+        "surface-container-high": "var(--md-surface-container-high)",
+        "surface-container-highest": "var(--md-surface-container-highest)",
+        outline: "var(--md-outline)",
+        "outline-variant": "var(--md-outline-variant)",
+      },
+      fontFamily: {
+        sans: ["Roboto", "system-ui", "sans-serif"],
+        mono: ["Roboto Mono", "ui-monospace", "monospace"],
+      },
+      borderRadius: {
+        xl: "14px",
+        "2xl": "18px",
+        "3xl": "20px",
+      },
+      boxShadow: {
+        card: "0 1px 3px rgba(var(--md-shadow-rgb), 0.09)",
+        elevated: "0 10px 24px rgba(var(--md-shadow-rgb), 0.16)",
+      },
+    },
+  },
   plugins: [],
 };

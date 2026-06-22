@@ -9,6 +9,8 @@ type Pm = {
   entry_price: number | null;
   exit_price: number | null;
   return_pct: number | null;
+  max_favorable_pct: number | null;
+  max_adverse_pct: number | null;
   outcome: string;
   thesis_held: boolean | null;
   what_worked: string | null;
@@ -16,51 +18,183 @@ type Pm = {
   lesson: string | null;
 };
 
+const OUTCOME_STYLES: Record<string, { bg: string; fg: string; label: string }> = {
+  win: { bg: "var(--md-success-container)", fg: "var(--md-success)", label: "Win" },
+  loss: { bg: "var(--md-error-container)", fg: "var(--md-on-error-container)", label: "Loss" },
+  target_hit: {
+    bg: "var(--md-success-container)",
+    fg: "var(--md-success)",
+    label: "Target hit",
+  },
+  stop_hit: {
+    bg: "var(--md-error-container)",
+    fg: "var(--md-on-error-container)",
+    label: "Stop hit",
+  },
+  manual_close: {
+    bg: "var(--md-surface-container-high)",
+    fg: "var(--md-on-surface-variant)",
+    label: "Manual close",
+  },
+  unknown: {
+    bg: "var(--md-surface-container-high)",
+    fg: "var(--md-on-surface-variant)",
+    label: "Unknown",
+  },
+};
+
 export function Postmortems() {
   const [rows, setRows] = useState<Pm[] | null>(null);
+
   useEffect(() => {
     api<Pm[]>("/admin/postmortems").then((r) => setRows(r.data));
   }, []);
 
-  if (!rows) return <p className="text-zinc-500">Loading…</p>;
-  if (rows.length === 0) return <p className="text-zinc-500">No post-mortems yet.</p>;
+  const accent = "var(--md-primary)";
+  const accentContainer = "var(--md-primary-container)";
+  const gain = "var(--md-success)";
+  const loss = "var(--md-error)";
+
+  if (!rows) {
+    return (
+      <div className="max-w-[900px] mx-auto px-8 py-10 text-on-surface-variant">Loading…</div>
+    );
+  }
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-4 text-amber-300">Post-mortems</h1>
-      <div className="space-y-4">
-        {rows.map((pm) => (
-          <div key={pm.id} className="border border-zinc-800 rounded p-4">
-            <div className="flex items-baseline gap-3 mb-2">
-              <span className="font-medium">{pm.symbol}</span>
-              <span className="text-xs text-zinc-500">
+    <div className="max-w-[900px] mx-auto px-8 py-10 pb-20 animate-view-in">
+      <div className="flex items-center gap-2.5 mb-6">
+        <span
+          className="material-symbols-rounded ms-fill"
+          style={{ color: accent, fontSize: 28 }}
+        >
+          fact_check
+        </span>
+        <h1 className="md-headline-large m-0">Post-mortems</h1>
+      </div>
+
+      {rows.length === 0 && (
+        <div
+          className="bg-surface-container-low border rounded-2xl p-10 text-center text-on-surface-variant"
+          style={{ borderColor: "var(--md-outline-variant)" }}
+        >
+          No post-mortems yet.
+        </div>
+      )}
+
+      {rows.map((pm, i) => {
+        const outcome = OUTCOME_STYLES[pm.outcome] ?? OUTCOME_STYLES.unknown;
+        const retColor = (pm.return_pct ?? 0) >= 0 ? gain : loss;
+        const mfe = pm.max_favorable_pct ?? 0;
+        const mae = Math.abs(pm.max_adverse_pct ?? 0);
+        const maxBar = Math.max(mfe, mae, 1);
+        return (
+          <div
+            key={pm.id}
+            className="bg-surface-container-low border rounded-2xl p-6 mb-4 shadow-card animate-card-in"
+            style={{
+              borderColor: "var(--md-outline-variant)",
+              animationDelay: `${i * 70}ms`,
+            }}
+          >
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
+              <span className="font-mono text-[19px] font-medium">{pm.symbol}</span>
+              <span className="text-[12.5px] text-on-surface-variant">
                 {pm.entry_date} → {pm.exit_date}
               </span>
-              <span className="text-xs px-2 py-0.5 rounded bg-zinc-800">{pm.outcome}</span>
               <span
-                className={`text-sm font-medium ${(pm.return_pct || 0) >= 0 ? "text-emerald-400" : "text-red-400"}`}
+                className="px-2.5 py-1 rounded-full text-[11.5px] font-semibold"
+                style={{ background: outcome.bg, color: outcome.fg }}
               >
-                {pm.return_pct?.toFixed(2)}%
+                {outcome.label}
+              </span>
+              <span
+                className="ml-auto font-mono text-[18px] font-semibold"
+                style={{ color: retColor }}
+              >
+                {pm.return_pct != null
+                  ? `${pm.return_pct >= 0 ? "+" : ""}${pm.return_pct.toFixed(2)}%`
+                  : "—"}
               </span>
             </div>
+
+            <div className="flex gap-4.5 mb-4" style={{ gap: 18 }}>
+              <div className="flex-1">
+                <div className="flex justify-between text-[11.5px] text-on-surface-variant mb-1.5">
+                  <span>Max favorable</span>
+                  <span style={{ color: gain, fontWeight: 600 }}>+{mfe.toFixed(1)}%</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-surface-container-high overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${(mfe / maxBar) * 100}%`, background: gain }}
+                  />
+                </div>
+              </div>
+              <div className="flex-1">
+                <div className="flex justify-between text-[11.5px] text-on-surface-variant mb-1.5">
+                  <span>Max adverse</span>
+                  <span style={{ color: loss, fontWeight: 600 }}>-{mae.toFixed(1)}%</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-surface-container-high overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${(mae / maxBar) * 100}%`, background: loss }}
+                  />
+                </div>
+              </div>
+            </div>
+
             {pm.what_worked && (
-              <p className="text-sm text-zinc-300 mb-1">
-                <span className="text-zinc-500">Worked:</span> {pm.what_worked}
-              </p>
+              <div className="flex gap-2.5 mb-2">
+                <span
+                  className="material-symbols-rounded flex-none"
+                  style={{ fontSize: 18, color: gain }}
+                >
+                  add_circle
+                </span>
+                <span className="text-[13.5px]" style={{ lineHeight: 1.55 }}>
+                  <span className="text-on-surface-variant">Worked — </span>
+                  {pm.what_worked}
+                </span>
+              </div>
             )}
             {pm.what_failed && (
-              <p className="text-sm text-zinc-300 mb-1">
-                <span className="text-zinc-500">Failed:</span> {pm.what_failed}
-              </p>
+              <div className="flex gap-2.5 mb-2">
+                <span
+                  className="material-symbols-rounded flex-none"
+                  style={{ fontSize: 18, color: loss }}
+                >
+                  remove_circle
+                </span>
+                <span className="text-[13.5px]" style={{ lineHeight: 1.55 }}>
+                  <span className="text-on-surface-variant">Failed — </span>
+                  {pm.what_failed}
+                </span>
+              </div>
             )}
             {pm.lesson && (
-              <p className="text-sm text-amber-300 mt-2">
-                <span className="text-zinc-500">Lesson:</span> {pm.lesson}
-              </p>
+              <div
+                className="flex gap-2.5 px-3.5 py-3 rounded-xl mt-2.5"
+                style={{ background: accentContainer }}
+              >
+                <span
+                  className="material-symbols-rounded ms-fill flex-none"
+                  style={{ fontSize: 18, color: accent }}
+                >
+                  lightbulb
+                </span>
+                <span
+                  className="text-[13.5px] font-medium"
+                  style={{ lineHeight: 1.55, color: accent }}
+                >
+                  {pm.lesson}
+                </span>
+              </div>
             )}
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }

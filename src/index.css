@@ -1,3 +1,287 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================
+   Ember — Material Design 3 tokens (warm scheme)
+   Mirrors the design system at claude.ai/design/p/dd882bb5
+   ============================================================ */
+
+:root {
+  /* Tonal palettes (warm — terracotta/ember + amber gold + warm grey) */
+  --ember-primary-10: #3b0b00;
+  --ember-primary-20: #5f1700;
+  --ember-primary-30: #82240a;
+  --ember-primary-40: #a83a1d;
+  --ember-primary-50: #c95334;
+  --ember-primary-60: #e76d4b;
+  --ember-primary-70: #ff8c68;
+  --ember-primary-80: #ffb59b;
+  --ember-primary-90: #ffdbcf;
+
+  --ember-tertiary-40: #7a5900;
+  --ember-tertiary-70: #e0c04a;
+  --ember-tertiary-90: #ffdf9e;
+
+  --ember-success-40: #3f6b3a;
+  --ember-success-90: #c0eeb4;
+  --ember-error-40: #ba1a1a;
+  --ember-error-90: #ffdad6;
+
+  /* Light semantic roles (default) */
+  --md-primary: var(--ember-primary-40);
+  --md-on-primary: #ffffff;
+  --md-primary-container: var(--ember-primary-90);
+  --md-on-primary-container: var(--ember-primary-10);
+
+  --md-secondary: #76584d;
+  --md-on-secondary: #ffffff;
+  --md-secondary-container: #ffdbcf;
+  --md-on-secondary-container: #2c160e;
+
+  --md-tertiary: var(--ember-tertiary-40);
+  --md-on-tertiary: #ffffff;
+  --md-tertiary-container: var(--ember-tertiary-90);
+  --md-on-tertiary-container: #261a00;
+
+  --md-error: var(--ember-error-40);
+  --md-on-error: #ffffff;
+  --md-error-container: var(--ember-error-90);
+  --md-on-error-container: #410002;
+
+  --md-success: var(--ember-success-40);
+  --md-success-container: var(--ember-success-90);
+
+  --md-background: #fff8f5;
+  --md-on-background: #211a16;
+  --md-surface: #fff8f5;
+  --md-on-surface: #211a16;
+  --md-surface-variant: #f4ded4;
+  --md-on-surface-variant: #53433c;
+
+  --md-surface-container-lowest: #ffffff;
+  --md-surface-container-low: #fbeee6;
+  --md-surface-container: #f5e8e0;
+  --md-surface-container-high: #f0e2da;
+  --md-surface-container-highest: #eaddd5;
+
+  --md-outline: #85736b;
+  --md-outline-variant: #d8c2b8;
+  --md-shadow-rgb: 60, 28, 16;
+
+  --md-font-plain: "Roboto", system-ui, -apple-system, sans-serif;
+  --md-font-mono: "Roboto Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+[data-theme="dark"] {
+  --md-primary: var(--ember-primary-80);
+  --md-on-primary: #5f1700;
+  --md-primary-container: #82240a;
+  --md-on-primary-container: var(--ember-primary-90);
+
+  --md-secondary: #ddb7a8;
+  --md-on-secondary: #432b22;
+  --md-secondary-container: #5c4137;
+  --md-on-secondary-container: #ffdbcf;
+
+  --md-tertiary: var(--ember-tertiary-70);
+  --md-on-tertiary: #402d00;
+  --md-tertiary-container: #5c4200;
+  --md-on-tertiary-container: var(--ember-tertiary-90);
+
+  --md-error: #ffb4ab;
+  --md-on-error: #690005;
+  --md-error-container: #93000a;
+  --md-on-error-container: var(--ember-error-90);
+
+  --md-background: #211a16;
+  --md-on-background: #ede0d9;
+  --md-surface: #211a16;
+  --md-on-surface: #ede0d9;
+  --md-surface-variant: #53433c;
+  --md-on-surface-variant: #d8c2b8;
+
+  --md-surface-container-lowest: #120d0b;
+  --md-surface-container-low: #211a16;
+  --md-surface-container: #251e1a;
+  --md-surface-container-high: #302924;
+  --md-surface-container-highest: #3b332e;
+
+  --md-outline: #a08d84;
+  --md-outline-variant: #53433c;
+  --md-shadow-rgb: 0, 0, 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--md-surface);
+  color: var(--md-on-surface);
+  font-family: var(--md-font-plain);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Material Symbols defaults */
+.material-symbols-rounded {
+  font-variation-settings: "wght" 400, "GRAD" 0, "opsz" 24;
+  vertical-align: middle;
+  user-select: none;
+}
+.ms-fill {
+  font-variation-settings: "FILL" 1, "wght" 500;
+}
+
+/* Type scale (subset of MD3) */
+.md-display-large {
+  font-size: 57px;
+  line-height: 64px;
+  letter-spacing: -0.25px;
+  font-weight: 500;
+}
+.md-display-small {
+  font-size: 36px;
+  line-height: 44px;
+  font-weight: 500;
+}
+.md-headline-large {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 500;
+}
+.md-headline-medium {
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 500;
+}
+.md-title-large {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 500;
+}
+.md-title-medium {
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.15px;
+  font-weight: 500;
+}
+.md-title-small {
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.1px;
+  font-weight: 500;
+}
+.md-body-large {
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.5px;
+}
+.md-body-medium {
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.25px;
+}
+.md-label-large {
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.1px;
+  font-weight: 500;
+}
+
+.font-mono {
+  font-family: var(--md-font-mono);
+}
+
+/* Animations */
+@keyframes viewIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rowIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes barGrow {
+  from {
+    width: 0 !important;
+  }
+}
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+    opacity: 0.9;
+  }
+  70% {
+    box-shadow: 0 0 0 7px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes gaugeFill {
+  from {
+    stroke-dashoffset: var(--gauge-c);
+  }
+}
+
+.animate-view-in {
+  animation: viewIn 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.animate-card-in {
+  animation: cardIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.animate-row-in {
+  animation: rowIn 0.4s ease both;
+}
+.animate-pulse-dot {
+  animation: pulse 2.2s infinite;
+}
+.animate-floaty {
+  animation: floaty 5s ease-in-out infinite;
+}
+
+/* Card hover lift */
+.card-hover {
+  transition:
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.25s;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(var(--md-shadow-rgb), 0.16);
+}
