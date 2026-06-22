@@ -8,6 +8,7 @@ import { Leaderboard } from "@/pages/Leaderboard";
 import { Lessons } from "@/pages/Lessons";
 import { TipJar } from "@/pages/TipJar";
 import { About } from "@/pages/About";
+import { Subscribe } from "@/pages/Subscribe";
 import { Dashboard } from "@/pages/admin/Dashboard";
 import { Postmortems } from "@/pages/admin/Postmortems";
 import { Broker } from "@/pages/admin/Broker";
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/leaderboard" element={<RequireAuth><Leaderboard /></RequireAuth>} />
         <Route path="/lessons" element={<RequireAuth><Lessons /></RequireAuth>} />
         <Route path="/tip-jar" element={<TipJar />} />
+        <Route path="/subscribe" element={<Subscribe />} />
         <Route path="/about" element={<About />} />
         <Route path="/admin" element={<RequireAdmin><Dashboard /></RequireAdmin>} />
         <Route path="/admin/postmortems" element={<RequireAdmin><Postmortems /></RequireAdmin>} />

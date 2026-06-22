@@ -1,50 +1,68 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { loginUrl } from "@/lib/api";
-import { Disclaimer } from "@/components/Disclaimer";
 
-function FeatureCard({
+function StatPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col items-center px-6 py-4">
+      <span
+        className="text-[26px] font-bold font-mono tracking-tight"
+        style={{ color: "var(--md-primary)" }}
+      >
+        {value}
+      </span>
+      <span className="text-[12px] text-on-surface-variant mt-0.5">{label}</span>
+    </div>
+  );
+}
+
+function StepCard({
+  step,
   icon,
-  containerColor,
-  containerFg,
+  time,
   title,
   body,
   delay,
 }: {
+  step: number;
   icon: string;
-  containerColor: string;
-  containerFg: string;
+  time: string;
   title: string;
   body: string;
   delay: number;
 }) {
   return (
     <div
-      className="bg-surface-container-low border rounded-2xl p-6 shadow-card animate-card-in"
-      style={{
-        borderColor: "var(--md-outline-variant)",
-        animationDelay: `${delay}ms`,
-      }}
+      className="relative bg-surface-container-low border rounded-2xl p-6 animate-card-in"
+      style={{ borderColor: "var(--md-outline-variant)", animationDelay: `${delay}ms` }}
     >
-      <span
-        className="grid place-items-center w-11 h-11 rounded-xl mb-3.5"
-        style={{ background: containerColor, color: containerFg }}
+      <div
+        className="absolute -top-3 left-5 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-widest"
+        style={{ background: "var(--md-primary)", color: "var(--md-on-primary)" }}
       >
-        <span className="material-symbols-rounded">{icon}</span>
-      </span>
-      <div className="md-title-medium mb-1.5">{title}</div>
-      <p className="md-body-medium m-0 text-on-surface-variant">{body}</p>
-    </div>
-  );
-}
-
-function Stat({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
-  return (
-    <div>
-      <div className="md-display-small" style={accent ? { color: "var(--md-primary)" } : undefined}>
-        {value}
+        STEP {step}
       </div>
-      <div className="md-label-large text-on-surface-variant">{label}</div>
+      <div className="flex items-center gap-3 mt-2 mb-3">
+        <span
+          className="grid place-items-center w-10 h-10 rounded-xl flex-none"
+          style={{
+            background: "var(--md-primary-container)",
+            color: "var(--md-on-primary-container)",
+          }}
+        >
+          <span className="material-symbols-rounded">{icon}</span>
+        </span>
+        <div>
+          <div className="md-title-small font-semibold">{title}</div>
+          <div
+            className="text-[11.5px] font-mono font-medium"
+            style={{ color: "var(--md-primary)" }}
+          >
+            {time}
+          </div>
+        </div>
+      </div>
+      <p className="md-body-medium m-0 text-on-surface-variant">{body}</p>
     </div>
   );
 }
@@ -55,107 +73,134 @@ export function Landing() {
 
   return (
     <div className="relative overflow-hidden animate-view-in">
-      {/* radial glow */}
+      {/* ember glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(900px 480px at 78% -8%, rgba(168,58,29,0.13), transparent 60%)",
+            "radial-gradient(900px 500px at 75% -5%, rgba(168,58,29,0.14), transparent 65%)",
         }}
       />
 
-      <div className="relative max-w-[1100px] mx-auto px-8 pt-20 pb-10">
+      {/* Hero */}
+      <div className="relative max-w-[1100px] mx-auto px-8 pt-20 pb-12">
         <div
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-[13px] font-medium text-on-surface-variant mb-6"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-[12.5px] font-semibold tracking-wide mb-6"
           style={{
             background: "var(--md-surface-container)",
             borderColor: "var(--md-outline-variant)",
+            color: "var(--md-primary)",
           }}
         >
-          <span
-            className="material-symbols-rounded"
-            style={{ fontSize: 17, color: "var(--md-primary)" }}
-          >
-            trending_up
-          </span>
-          NIFTY-100 equity rotation
+          <span className="w-2 h-2 rounded-full animate-pulse-dot" style={{ background: "var(--md-success)" }} />
+          NIFTY-100 · automated · live
         </div>
 
         <h1
-          className="md-display-large m-0 max-w-[18ch]"
-          style={{ letterSpacing: "-1px", fontWeight: 500 }}
+          className="md-display-large m-0 mb-5"
+          style={{ letterSpacing: "-1px", fontWeight: 500, maxWidth: "18ch" }}
         >
-          What I'm buying today{" "}
-          <span style={{ color: "var(--md-primary)" }}>— and why.</span>
+          My market picks —{" "}
+          <span style={{ color: "var(--md-primary)" }}>open for anyone to follow.</span>
         </h1>
 
-        <p className="md-body-large max-w-[60ch] my-6 text-on-surface-variant">
-          A transparent record of every trade my system takes. Picks made pre-market, placed at the
-          open, exits managed by trailing stops. Sign in to follow along — the same trades, the same
-          reasoning, the full track record.
+        <p
+          className="md-body-large m-0 mb-8 text-on-surface-variant"
+          style={{ maxWidth: "58ch", lineHeight: 1.7 }}
+        >
+          Every morning a quantitative screen + reasoning layer picks stocks from the NIFTY-100.
+          Orders go in at the open. Trailing stops manage the exit. You see every pick, every
+          outcome, the full track record — nothing cherry-picked.
         </p>
 
-        <div className="flex items-center gap-5 flex-wrap">
+        <div className="flex flex-wrap items-center gap-4">
           <a
             href={loginUrl("/today")}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-on-primary font-medium text-[15px] hover:brightness-105 transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-[15px] text-on-primary hover:brightness-105 transition-all shadow-md"
             style={{ background: "var(--md-primary)" }}
           >
             <span className="material-symbols-rounded">login</span>
-            Sign in with Google
+            Sign in to follow
           </a>
-          <span className="text-[13.5px] text-on-surface-variant">
-            It's free to follow along · no advice, just my journal
-          </span>
+          <a
+            href="/about"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-[14px] font-medium text-on-surface-variant hover:bg-surface-container-high transition-colors border"
+            style={{ borderColor: "var(--md-outline-variant)" }}
+          >
+            How it works
+            <span className="material-symbols-rounded" style={{ fontSize: 18 }}>
+              arrow_forward
+            </span>
+          </a>
         </div>
       </div>
 
-      {/* feature cards */}
-      <div className="relative max-w-[1100px] mx-auto px-8 pt-6 grid grid-cols-1 md:grid-cols-3 gap-4.5" style={{ gap: 18 }}>
-        <FeatureCard
-          icon="filter_alt"
-          containerColor="var(--md-primary-container)"
-          containerFg="var(--md-on-primary-container)"
-          title="Pre-market funnel"
-          body="A deterministic screen ranks the universe to a shortlist, then reasoning picks the day's leads at 08:30."
-          delay={60}
-        />
-        <FeatureCard
-          icon="stairs"
-          containerColor="var(--md-tertiary-container)"
-          containerFg="var(--md-on-tertiary-container)"
-          title="Trailing-stop exits"
-          body="Positions ride a chase loop intraday — stops trail winners and cut losers mechanically, no second-guessing."
-          delay={140}
-        />
-        <FeatureCard
-          icon="history_edu"
-          containerColor="var(--md-secondary-container)"
-          containerFg="var(--md-on-secondary-container)"
-          title="Honest track record"
-          body="Wins and losses, hold times, and the lessons distilled from closed trades — nothing cherry-picked."
-          delay={220}
-        />
-      </div>
-
-      {/* stats strip */}
-      <div className="relative max-w-[1100px] mx-auto mt-9 px-8">
+      {/* Stats strip */}
+      <div className="relative max-w-[1100px] mx-auto px-8 mb-10">
         <div
-          className="flex flex-wrap gap-10 px-8 py-7 rounded-2xl border bg-surface-container"
-          style={{ borderColor: "var(--md-outline-variant)" }}
+          className="flex flex-wrap divide-x rounded-2xl border overflow-hidden bg-surface-container"
+          style={{
+            borderColor: "var(--md-outline-variant)",
+            divideColor: "var(--md-outline-variant)",
+          }}
         >
-          <Stat value="—" label="Win rate" accent />
-          <div className="w-px self-stretch" style={{ background: "var(--md-outline-variant)" }} />
-          <Stat value="—" label="Trades logged" />
-          <div className="w-px self-stretch" style={{ background: "var(--md-outline-variant)" }} />
-          <Stat value="—" label="Avg return" />
-          <div className="w-px self-stretch" style={{ background: "var(--md-outline-variant)" }} />
-          <Stat value="—" label="Avg hold" />
+          <StatPill label="Win rate" value="—" />
+          <StatPill label="Closed trades" value="—" />
+          <StatPill label="Avg return" value="—%" />
+          <StatPill label="Avg hold" value="— days" />
+          <StatPill label="Running since" value="Jun '26" />
         </div>
       </div>
 
-      <div className="max-w-[1100px] mx-auto mt-6 px-8 pb-16">
-        <Disclaimer />
+      {/* How it works */}
+      <div className="relative max-w-[1100px] mx-auto px-8 pb-4">
+        <h2
+          className="md-title-large mb-6"
+          style={{ fontWeight: 500, color: "var(--md-on-surface-variant)" }}
+        >
+          The system, step by step
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StepCard
+            step={1}
+            icon="filter_alt"
+            time="08:30 IST"
+            title="Quantitative screen"
+            body="A 6-factor ranker filters the NIFTY-100 universe. Momentum, trend, volatility-adjusted return, and regime filter cut it to a shortlist of 10–15 stocks."
+            delay={60}
+          />
+          <StepCard
+            step={2}
+            icon="psychology"
+            time="09:00 IST"
+            title="Reasoning layer picks"
+            body="An LLM reads fundamentals, FII/DII flows, and overnight signals on the shortlist. It scores each stock and selects the day's picks with a written rationale."
+            delay={140}
+          />
+          <StepCard
+            step={3}
+            icon="sensors"
+            time="09:15–15:30"
+            title="Trailing-stop exits"
+            body="Orders go in at the open. A chase loop monitors intraday prices — trailing the stop as the stock moves up, cutting if it falls. No manual intervention."
+            delay={220}
+          />
+        </div>
+      </div>
+
+      {/* Disclaimer */}
+      <div className="relative max-w-[1100px] mx-auto px-8 py-8 mt-4">
+        <p
+          className="text-[12px] text-on-surface-variant leading-relaxed"
+          style={{ maxWidth: "72ch" }}
+        >
+          <span className="material-symbols-rounded align-text-bottom mr-1" style={{ fontSize: 15 }}>
+            gavel
+          </span>
+          This is a personal automated trading system. I am not a SEBI-registered investment
+          adviser. Nothing here is a recommendation. Past performance does not guarantee future
+          results. Act on this at your own risk.
+        </p>
       </div>
     </div>
   );

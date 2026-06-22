@@ -10,7 +10,8 @@ const NAV_PUBLIC: NavItem[] = [
   { to: "/history", label: "History", icon: "history" },
   { to: "/leaderboard", label: "Leaderboard", icon: "leaderboard" },
   { to: "/lessons", label: "Lessons", icon: "menu_book" },
-  { to: "/tip-jar", label: "Tip jar", icon: "local_cafe" },
+  { to: "/subscribe", label: "Notifications", icon: "notifications_active" },
+  { to: "/tip-jar", label: "Support", icon: "volunteer_activism" },
   { to: "/about", label: "About", icon: "info" },
 ];
 
