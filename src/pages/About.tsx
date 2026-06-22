@@ -66,7 +66,7 @@ export function About() {
         <FactCard
           icon="filter_alt"
           title="6-factor quantitative ranker"
-          body="Momentum, trend strength, volatility-adjusted return, price vs. 52-week high, volume profile, and a regime filter cut the NIFTY-100 universe to a 10–15 stock shortlist every morning."
+          body="Momentum, trend strength, volatility-adjusted return, price vs. 52-week high, volume profile, and a regime filter cut a 300+ symbol universe (NIFTY 200 + Midcap 100 + ETFs) to a 10–15 stock shortlist every morning."
         />
         <FactCard
           icon="psychology"

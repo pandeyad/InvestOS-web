@@ -93,7 +93,7 @@ export function Landing() {
           }}
         >
           <span className="w-2 h-2 rounded-full animate-pulse-dot" style={{ background: "var(--md-success)" }} />
-          NIFTY-100 · automated · live
+          NSE equities · ETFs · automated · live
         </div>
 
         <h1
@@ -108,9 +108,10 @@ export function Landing() {
           className="md-body-large m-0 mb-8 text-on-surface-variant"
           style={{ maxWidth: "58ch", lineHeight: 1.7 }}
         >
-          Every morning a quantitative screen + reasoning layer picks stocks from the NIFTY-100.
-          Orders go in at the open. Trailing stops manage the exit. You see every pick, every
-          outcome, the full track record — nothing cherry-picked.
+          Every morning a quantitative screen + reasoning layer picks from a universe of
+          300+ NSE equities (NIFTY 200, Midcap 100) and index ETFs. Orders go in at the
+          open. Trailing stops manage the exit. You see every pick, every outcome, the full
+          track record — nothing cherry-picked.
         </p>
 
         <div className="flex flex-wrap items-center gap-4">
@@ -166,7 +167,7 @@ export function Landing() {
             icon="filter_alt"
             time="08:30 IST"
             title="Quantitative screen"
-            body="A 6-factor ranker filters the NIFTY-100 universe. Momentum, trend, volatility-adjusted return, and regime filter cut it to a shortlist of 10–15 stocks."
+            body="A 6-factor ranker filters a universe of 300+ NSE equities and ETFs (NIFTY 200, Midcap 100, index ETFs). Momentum, trend, volatility-adjusted return, and regime filter cut it to a shortlist of 10–15."
             delay={60}
           />
           <StepCard
