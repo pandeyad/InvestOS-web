@@ -1,3 +1,5 @@
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/auth";
 import { loginUrl } from "@/lib/api";
 import { Disclaimer } from "@/components/Disclaimer";
 
@@ -48,6 +50,9 @@ function Stat({ value, label, accent }: { value: string; label: string; accent?:
 }
 
 export function Landing() {
+  const { user, loading } = useAuth();
+  if (!loading && user) return <Navigate to="/today" replace />;
+
   return (
     <div className="relative overflow-hidden animate-view-in">
       {/* radial glow */}

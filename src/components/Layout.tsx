@@ -147,7 +147,7 @@ export function Layout() {
             </div>
           ) : (
             <a
-              href={loginUrl(loc.pathname)}
+              href={loginUrl(loc.pathname === "/" ? "/today" : loc.pathname)}
               className="flex items-center gap-2 px-4 py-2 rounded-full font-medium text-[14px] text-on-primary hover:brightness-105 transition-all"
               style={{ background: "var(--md-primary)" }}
             >
