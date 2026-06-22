@@ -1,5 +1,6 @@
 {
   "name": "investos-web",
+  "description": "Public trading journal for the InvestOS automated NIFTY equity-rotation system",
   "private": true,
   "version": "0.1.0",
   "type": "module",

@@ -31,4 +31,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
+          # Vercel sets VITE_API_BASE=/api in production (the vercel.json rewrite handles routing).
+          # CI uses the direct DuckDNS URL so the build succeeds without Vercel's rewrite layer.
+          # Vite bakes this as a string constant — no live API calls happen during the build step.
           VITE_API_BASE: https://investos.duckdns.org
