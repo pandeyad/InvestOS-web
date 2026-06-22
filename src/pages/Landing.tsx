@@ -140,10 +140,7 @@ export function Landing() {
       <div className="relative max-w-[1100px] mx-auto px-8 mb-10">
         <div
           className="flex flex-wrap divide-x rounded-2xl border overflow-hidden bg-surface-container"
-          style={{
-            borderColor: "var(--md-outline-variant)",
-            divideColor: "var(--md-outline-variant)",
-          }}
+          style={{ borderColor: "var(--md-outline-variant)" }}
         >
           <StatPill label="Win rate" value="—" />
           <StatPill label="Closed trades" value="—" />
