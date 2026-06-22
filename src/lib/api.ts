@@ -50,6 +50,9 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<Enve
   if (!res.ok) {
     throw new HttpError(res.status, await res.text());
   }
+  if (res.status === 204 || res.headers.get("content-length") === "0") {
+    return { data: null as T, disclaimer: "", as_of: "", role: null };
+  }
   return res.json() as Promise<Envelope<T>>;
 }
 

@@ -137,7 +137,7 @@ export function Layout() {
               </span>
               <button
                 onClick={async () => {
-                  await logout();
+                  try { await logout(); } catch { /* already logged out */ }
                   window.location.href = "/";
                 }}
                 className="text-[13px] text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-full hover:bg-surface-container-high transition-colors"
