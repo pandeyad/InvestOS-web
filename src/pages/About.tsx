@@ -48,10 +48,10 @@ export function About() {
 
       {/* What this is */}
       <p className="md-body-large m-0 mb-4" style={{ lineHeight: 1.7 }}>
-        I built a fully automated NIFTY-100 equity-rotation system that runs premarket,
-        picks stocks, places orders at the open, and manages exits with trailing stop-loss
-        GTTs — all without manual intervention. This site publishes every pick I take and
-        its outcome, in real time.
+        I built a fully automated equity system that runs premarket across 300+ NSE
+        equities (NIFTY 200, Midcap 100, index ETFs), picks stocks, places orders at the
+        open, and manages exits with trailing stop-loss GTTs — all without manual
+        intervention. This site publishes every pick I take and its outcome, in real time.
       </p>
       <p className="md-body-large m-0 mb-8 text-on-surface-variant" style={{ lineHeight: 1.7 }}>
         The system is not a newsletter, not a Telegram group, not a "course". It's an

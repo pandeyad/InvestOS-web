@@ -37,10 +37,10 @@ export default function App() {
         <Route path="/today" element={<RequireAuth><Today /></RequireAuth>} />
         <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
         <Route path="/leaderboard" element={<RequireAuth><Leaderboard /></RequireAuth>} />
-        <Route path="/lessons" element={<RequireAuth><Lessons /></RequireAuth>} />
+        <Route path="/lessons" element={<RequireAdmin><Lessons /></RequireAdmin>} />
         <Route path="/tip-jar" element={<TipJar />} />
         <Route path="/subscribe" element={<Subscribe />} />
-        <Route path="/about" element={<About />} />
+        <Route path="/about" element={<RequireAuth><About /></RequireAuth>} />
         <Route path="/admin" element={<RequireAdmin><Dashboard /></RequireAdmin>} />
         <Route path="/admin/postmortems" element={<RequireAdmin><Postmortems /></RequireAdmin>} />
         <Route path="/admin/broker" element={<RequireAdmin><Broker /></RequireAdmin>} />

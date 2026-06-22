@@ -9,7 +9,6 @@ const NAV_PUBLIC: NavItem[] = [
   { to: "/today", label: "Today", icon: "today" },
   { to: "/history", label: "History", icon: "history" },
   { to: "/leaderboard", label: "Leaderboard", icon: "leaderboard" },
-  { to: "/lessons", label: "Lessons", icon: "menu_book" },
   { to: "/subscribe", label: "Notifications", icon: "notifications_active" },
   { to: "/tip-jar", label: "Support", icon: "volunteer_activism" },
   { to: "/about", label: "About", icon: "info" },
@@ -20,6 +19,7 @@ const NAV_ADMIN: NavItem[] = [
   { to: "/admin/postmortems", label: "Post-mortems", icon: "fact_check" },
   { to: "/admin/broker", label: "Broker", icon: "hub" },
   { to: "/admin/control", label: "Control", icon: "tune" },
+  { to: "/lessons", label: "Lessons", icon: "menu_book" },
 ];
 
 function Pill({ item, active }: { item: NavItem; active: boolean }) {
@@ -63,7 +63,6 @@ export function Layout() {
           </span>
           <div className="leading-[1.05]">
             <div className="text-[18px] font-bold tracking-tight">WIB</div>
-            <div className="text-[11px] text-on-surface-variant tracking-wide">trading journal</div>
           </div>
         </Link>
 
@@ -176,8 +175,8 @@ export function Layout() {
             gavel
           </span>
           <span className="leading-relaxed">
-            Personal trading journal. Not investment advice. Past performance does not guarantee
-            future results.
+            Personal automated trading account. Not investment advice. I am not a SEBI-registered
+            adviser. Past performance does not guarantee future results.
           </span>
         </div>
       </footer>
