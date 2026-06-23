@@ -125,7 +125,7 @@ export function Leaderboard() {
 
         {/* Stat grid: 2-col on mobile, 3-col on md+ */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-[14px]">
-          <StatTile label="Trades logged" value={String(agg?.lead_count ?? 0)} />
+          <StatTile label="Trades placed" value={String(agg?.lead_count ?? 0)} />
           <StatTile label="Avg return" value={fmtPct(agg?.avg_return_pct ?? null, true)} color={gain} />
           <StatTile
             label="Avg hold"
