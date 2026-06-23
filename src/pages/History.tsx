@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
 
 type Lead = {
@@ -6,8 +7,11 @@ type Lead = {
   symbol: string;
   direction: string;
   entry_price: number | null;
+  stop_price: number | null;
+  target_price: number | null;
   stop_pct: number | null;
   target_pct: number | null;
+  conviction: number | null;
   status: string;
   created_at: string;
 };
@@ -35,7 +39,7 @@ const STATUS_STYLES: Record<string, { bg: string; fg: string; label: string }> =
   pending: { bg: "var(--md-secondary-container)", fg: "var(--md-on-secondary-container)", label: "Pending" },
 };
 
-// ── Equity Curve SVG ────────────────────────────────────────────────────────
+// ── Equity Curve (SVG, kept from original) ───────────────────────────────────
 
 const W = 900;
 const H = 220;
@@ -54,9 +58,7 @@ function EquityCurve({ data }: { data: CurvePoint[] }) {
   if (data.length < 2) return null;
 
   const n = data.length;
-  const xs = data.map((_, i) =>
-    PAD.left + (i / (n - 1)) * (W - PAD.left - PAD.right)
-  );
+  const xs = data.map((_, i) => PAD.left + (i / (n - 1)) * (W - PAD.left - PAD.right));
 
   const allPcts: number[] = [0, ...data.map((d) => d.portfolio_pct)];
   data.forEach((d) => { if (d.nifty_pct !== null) allPcts.push(d.nifty_pct); });
@@ -69,7 +71,6 @@ function EquityCurve({ data }: { data: CurvePoint[] }) {
   );
 
   const zeroY = toY(0, minY, maxY);
-
   const tickStep = (maxY - minY) > 20 ? 10 : (maxY - minY) > 8 ? 5 : 2;
   const ticks: number[] = [];
   for (let v = Math.ceil(minY / tickStep) * tickStep; v <= maxY; v += tickStep) ticks.push(v);
@@ -84,7 +85,7 @@ function EquityCurve({ data }: { data: CurvePoint[] }) {
   const lastNiftyVal = data[data.length - 1].nifty_pct;
 
   return (
-    <div className="mb-8 bg-surface-container-low border rounded-2xl overflow-hidden" style={{ borderColor: "var(--md-outline-variant)" }}>
+    <div className="mb-7 bg-surface-container-lowest border rounded-2xl overflow-hidden" style={{ borderColor: "var(--md-outline-variant)" }}>
       <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "var(--md-outline-variant)" }}>
         <div>
           <div className="md-title-small font-semibold">Portfolio vs NIFTY-100</div>
@@ -104,7 +105,6 @@ function EquityCurve({ data }: { data: CurvePoint[] }) {
 
       <div className="px-3 pt-2 pb-1">
         <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ maxWidth: "100%", height: "auto", display: "block" }}>
-          {/* Y grid + labels */}
           {ticks.map((v) => {
             const y = toY(v, minY, maxY);
             return (
@@ -112,42 +112,29 @@ function EquityCurve({ data }: { data: CurvePoint[] }) {
                 <line x1={PAD.left} x2={W - PAD.right} y1={y} y2={y}
                   stroke="var(--md-outline-variant)" strokeWidth={v === 0 ? 1 : 0.5}
                   strokeDasharray={v === 0 ? undefined : "3,3"} />
-                <text x={PAD.left - 6} y={y + 4} textAnchor="end" fontSize={10}
-                  fill="var(--md-on-surface-variant)">
+                <text x={PAD.left - 6} y={y + 4} textAnchor="end" fontSize={10} fill="var(--md-on-surface-variant)">
                   {v > 0 ? `+${v}` : v}%
                 </text>
               </g>
             );
           })}
-
-          {/* X labels */}
           {uniqueXLabels.map((i) => (
-            <text key={i} x={xs[i]} y={H - 4} textAnchor="middle" fontSize={10}
-              fill="var(--md-on-surface-variant)">
+            <text key={i} x={xs[i]} y={H - 4} textAnchor="middle" fontSize={10} fill="var(--md-on-surface-variant)">
               {data[i].date.slice(5)}
             </text>
           ))}
-
-          {/* NIFTY line */}
           {niftyPts.length > 1 && (
             <path d={linePath(niftyPts)} fill="none" stroke="var(--md-outline)" strokeWidth={1.5} strokeLinejoin="round" />
           )}
-
-          {/* Portfolio area fill */}
           <path
             d={`${linePath(portPts)} L${lastPort[0]},${zeroY} L${portPts[0][0]},${zeroY} Z`}
             fill="var(--md-primary)" fillOpacity={0.1}
           />
-
-          {/* Portfolio line */}
           <path d={linePath(portPts)} fill="none" stroke="var(--md-primary)" strokeWidth={2} strokeLinejoin="round" />
-
-          {/* End labels */}
           <circle cx={lastPort[0]} cy={lastPort[1]} r={3} fill="var(--md-primary)" />
           <text x={lastPort[0] + 6} y={lastPort[1] + 4} fontSize={10} fontWeight={600} fill="var(--md-primary)">
             {lastPortVal > 0 ? `+${lastPortVal.toFixed(1)}` : lastPortVal.toFixed(1)}%
           </text>
-
           {lastNiftyPt && lastNiftyVal !== null && (
             <>
               <circle cx={lastNiftyPt[0]} cy={lastNiftyPt[1]} r={2.5} fill="var(--md-outline)" />
@@ -162,9 +149,10 @@ function EquityCurve({ data }: { data: CurvePoint[] }) {
   );
 }
 
-// ── Page ────────────────────────────────────────────────────────────────────
+// ── Page ─────────────────────────────────────────────────────────────────────
 
 export function History() {
+  const navigate = useNavigate();
   const [days, setDays] = useState(30);
   const [leads, setLeads] = useState<Lead[] | null>(null);
   const [curve, setCurve] = useState<CurvePoint[] | null>(null);
@@ -183,7 +171,12 @@ export function History() {
       {curve !== null && curve.length > 1 && <EquityCurve data={curve} />}
 
       <div className="flex items-end justify-between gap-4 flex-wrap mb-6">
-        <h1 className="md-headline-large m-0">Trade history</h1>
+        <div>
+          <h1 className="md-headline-large m-0">Trade history</h1>
+          <div className="text-[13px] text-on-surface-variant mt-1">
+            Stocks the system purchased — tap any row for full analysis
+          </div>
+        </div>
         <div className="flex rounded-full p-1" style={{ background: "var(--md-surface-container)" }}>
           {DAY_OPTIONS.map((o) => (
             <button
@@ -205,18 +198,28 @@ export function History() {
       {leads === null && <p className="text-on-surface-variant">Loading…</p>}
 
       {leads && leads.length === 0 && (
-        <div className="bg-surface-container-low border rounded-2xl p-10 text-center" style={{ borderColor: "var(--md-outline-variant)" }}>
-          <span className="material-symbols-rounded mb-3 text-on-surface-variant" style={{ fontSize: 48 }}>history</span>
-          <div className="md-title-medium">No trades in this window.</div>
+        <div className="bg-surface-container-lowest border rounded-2xl p-12 text-center" style={{ borderColor: "var(--md-outline-variant)" }}>
+          <span className="material-symbols-rounded mb-3 text-on-surface-variant" style={{ fontSize: 48 }}>receipt_long</span>
+          <div className="md-title-medium mb-1">No placed trades in this window</div>
+          <div className="text-[13px] text-on-surface-variant">
+            Leads become history once the system places an order with the broker.
+          </div>
         </div>
       )}
 
       {leads && leads.length > 0 && (
-        <div className="bg-surface-container-low border rounded-2xl overflow-hidden shadow-card" style={{ borderColor: "var(--md-outline-variant)" }}>
-          {/* Header: 3-col on mobile (date, symbol, status), all 6 on md+ */}
+        <div
+          className="bg-surface-container-lowest border rounded-2xl overflow-hidden shadow-card"
+          style={{ borderColor: "var(--md-outline-variant)" }}
+        >
+          {/* Header */}
           <div
-            className="grid grid-cols-[90px_1.4fr_1.1fr] md:grid-cols-[90px_1.4fr_1fr_1fr_1fr_1.1fr] gap-3 px-6 py-3.5 text-[11.5px] font-semibold uppercase tracking-wide text-on-surface-variant"
-            style={{ background: "var(--md-surface-container)" }}
+            className="grid px-6 py-3 text-[11.5px] font-semibold uppercase tracking-wide text-on-surface-variant"
+            style={{
+              background: "var(--md-surface-container)",
+              gridTemplateColumns: "90px 1.4fr 1fr 1fr 1fr 1.1fr 24px",
+              gap: "12px",
+            }}
           >
             <span>Date</span>
             <span>Symbol</span>
@@ -224,28 +227,52 @@ export function History() {
             <span className="hidden md:block text-right">Stop %</span>
             <span className="hidden md:block text-right">Target %</span>
             <span className="text-right">Status</span>
+            <span />
           </div>
+
           {leads.map((r, i) => {
             const status = STATUS_STYLES[r.status] ?? STATUS_STYLES.pending;
+            const stopPct = r.stop_pct ?? (r.entry_price && r.stop_price
+              ? ((r.stop_price - r.entry_price) / r.entry_price) * 100 : null);
+            const targetPct = r.target_pct ?? (r.entry_price && r.target_price
+              ? ((r.target_price - r.entry_price) / r.entry_price) * 100 : null);
             return (
               <div
                 key={r.id}
-                className="grid grid-cols-[90px_1.4fr_1.1fr] md:grid-cols-[90px_1.4fr_1fr_1fr_1fr_1.1fr] gap-3 px-6 py-4 border-t items-center transition-colors hover:bg-surface-container-high animate-row-in"
-                style={{ borderColor: "var(--md-outline-variant)", animationDelay: `${i * 30}ms` }}
+                className="grid px-6 py-4 border-t items-center cursor-pointer transition-colors animate-row-in"
+                style={{
+                  borderColor: "var(--md-outline-variant)",
+                  animationDelay: `${i * 30}ms`,
+                  gridTemplateColumns: "90px 1.4fr 1fr 1fr 1fr 1.1fr 24px",
+                  gap: "12px",
+                }}
+                onClick={() => navigate(`/stock/${r.symbol}?from=history`)}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--md-surface-container)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "")}
               >
                 <span className="text-[13px] text-on-surface-variant">{r.created_at.slice(0, 10)}</span>
-                <span className="font-mono text-[14.5px] font-medium">{r.symbol}</span>
-                <span className="hidden md:block text-right font-mono text-[13.5px]">{r.entry_price?.toFixed(2) ?? "—"}</span>
+                <div>
+                  <div className="font-mono text-[14.5px] font-semibold">{r.symbol}</div>
+                  {r.direction === "short" && (
+                    <div className="text-[11px] text-on-surface-variant">Short</div>
+                  )}
+                </div>
+                <span className="hidden md:block text-right font-mono text-[13.5px]">
+                  {r.entry_price != null ? `₹${r.entry_price.toFixed(2)}` : "—"}
+                </span>
                 <span className="hidden md:block text-right font-mono text-[13.5px]" style={{ color: "var(--md-error)" }}>
-                  {r.stop_pct != null ? `${r.stop_pct.toFixed(2)}%` : "—"}
+                  {stopPct != null ? `${stopPct.toFixed(2)}%` : "—"}
                 </span>
                 <span className="hidden md:block text-right font-mono text-[13.5px]" style={{ color: "var(--md-success)" }}>
-                  {r.target_pct != null ? `+${r.target_pct.toFixed(2)}%` : "—"}
+                  {targetPct != null && targetPct > 0 ? `+${targetPct.toFixed(2)}%` : targetPct != null ? `${targetPct.toFixed(2)}%` : "—"}
                 </span>
                 <span className="text-right">
                   <span className="px-2.5 py-1 rounded-full text-[11.5px] font-semibold" style={{ background: status.bg, color: status.fg }}>
                     {status.label}
                   </span>
+                </span>
+                <span className="material-symbols-rounded text-on-surface-variant" style={{ fontSize: 18 }}>
+                  chevron_right
                 </span>
               </div>
             );

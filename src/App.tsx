@@ -13,6 +13,7 @@ import { Dashboard } from "@/pages/admin/Dashboard";
 import { Postmortems } from "@/pages/admin/Postmortems";
 import { Broker } from "@/pages/admin/Broker";
 import { Control } from "@/pages/admin/Control";
+import { Stock } from "@/pages/Stock";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/lessons" element={<RequireAdmin><Lessons /></RequireAdmin>} />
         <Route path="/tip-jar" element={<TipJar />} />
         <Route path="/subscribe" element={<Subscribe />} />
+        <Route path="/stock/:symbol" element={<RequireAuth><Stock /></RequireAuth>} />
         <Route path="/about" element={<RequireAuth><About /></RequireAuth>} />
         <Route path="/admin" element={<RequireAdmin><Dashboard /></RequireAdmin>} />
         <Route path="/admin/postmortems" element={<RequireAdmin><Postmortems /></RequireAdmin>} />

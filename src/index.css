@@ -3,112 +3,96 @@
 @tailwind utilities;
 
 /* ============================================================
-   Ember — Material Design 3 tokens (warm scheme)
-   Mirrors the design system at claude.ai/design/p/dd882bb5
+   Ocean — Material Design 3 tokens (slate-blue scheme)
+   Clean, professional financial palette
    ============================================================ */
 
 :root {
-  /* Tonal palettes (warm — terracotta/ember + amber gold + warm grey) */
-  --ember-primary-10: #3b0b00;
-  --ember-primary-20: #5f1700;
-  --ember-primary-30: #82240a;
-  --ember-primary-40: #a83a1d;
-  --ember-primary-50: #c95334;
-  --ember-primary-60: #e76d4b;
-  --ember-primary-70: #ff8c68;
-  --ember-primary-80: #ffb59b;
-  --ember-primary-90: #ffdbcf;
-
-  --ember-tertiary-40: #7a5900;
-  --ember-tertiary-70: #e0c04a;
-  --ember-tertiary-90: #ffdf9e;
-
-  --ember-success-40: #3f6b3a;
-  --ember-success-90: #c0eeb4;
-  --ember-error-40: #ba1a1a;
-  --ember-error-90: #ffdad6;
-
-  /* Light semantic roles (default) */
-  --md-primary: var(--ember-primary-40);
+  /* Primary: Ocean Blue */
+  --md-primary: #1B6CA8;
   --md-on-primary: #ffffff;
-  --md-primary-container: var(--ember-primary-90);
-  --md-on-primary-container: var(--ember-primary-10);
+  --md-primary-container: #D0E9F8;
+  --md-on-primary-container: #002E4D;
 
-  --md-secondary: #76584d;
+  /* Secondary: Slate */
+  --md-secondary: #4A586B;
   --md-on-secondary: #ffffff;
-  --md-secondary-container: #ffdbcf;
-  --md-on-secondary-container: #2c160e;
+  --md-secondary-container: #D8E6F2;
+  --md-on-secondary-container: #0C1E30;
 
-  --md-tertiary: var(--ember-tertiary-40);
+  /* Tertiary: Teal */
+  --md-tertiary: #00717B;
   --md-on-tertiary: #ffffff;
-  --md-tertiary-container: var(--ember-tertiary-90);
-  --md-on-tertiary-container: #261a00;
+  --md-tertiary-container: #B0EEEF;
+  --md-on-tertiary-container: #002022;
 
-  --md-error: var(--ember-error-40);
+  /* Error / Success */
+  --md-error: #B91C1C;
   --md-on-error: #ffffff;
-  --md-error-container: var(--ember-error-90);
-  --md-on-error-container: #410002;
+  --md-error-container: #FEE2E2;
+  --md-on-error-container: #7F1D1D;
 
-  --md-success: var(--ember-success-40);
-  --md-success-container: var(--ember-success-90);
+  --md-success: #166534;
+  --md-success-container: #DCFCE7;
 
-  --md-background: #fff8f5;
-  --md-on-background: #211a16;
-  --md-surface: #fff8f5;
-  --md-on-surface: #211a16;
-  --md-surface-variant: #f4ded4;
-  --md-on-surface-variant: #53433c;
+  /* Surfaces (slightly blue-gray) */
+  --md-background: #F5F7FA;
+  --md-on-background: #0F1924;
+  --md-surface: #F5F7FA;
+  --md-on-surface: #0F1924;
+  --md-surface-variant: #DDE5EE;
+  --md-on-surface-variant: #3D4E5F;
 
-  --md-surface-container-lowest: #ffffff;
-  --md-surface-container-low: #fbeee6;
-  --md-surface-container: #f5e8e0;
-  --md-surface-container-high: #f0e2da;
-  --md-surface-container-highest: #eaddd5;
+  --md-surface-container-lowest: #FFFFFF;
+  --md-surface-container-low: #EDF2F8;
+  --md-surface-container: #E4EDF6;
+  --md-surface-container-high: #D8E4EF;
+  --md-surface-container-highest: #CCDAE8;
 
-  --md-outline: #85736b;
-  --md-outline-variant: #d8c2b8;
-  --md-shadow-rgb: 60, 28, 16;
+  --md-outline: #5B6F84;
+  --md-outline-variant: #BFCEDB;
+  --md-shadow-rgb: 10, 25, 50;
 
   --md-font-plain: "Roboto", system-ui, -apple-system, sans-serif;
   --md-font-mono: "Roboto Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 [data-theme="dark"] {
-  --md-primary: var(--ember-primary-80);
-  --md-on-primary: #5f1700;
-  --md-primary-container: #82240a;
-  --md-on-primary-container: var(--ember-primary-90);
+  --md-primary: #8DCAF2;
+  --md-on-primary: #00344E;
+  --md-primary-container: #004E78;
+  --md-on-primary-container: #D0E9F8;
 
-  --md-secondary: #ddb7a8;
-  --md-on-secondary: #432b22;
-  --md-secondary-container: #5c4137;
-  --md-on-secondary-container: #ffdbcf;
+  --md-secondary: #ABBCCE;
+  --md-on-secondary: #1A2C3E;
+  --md-secondary-container: #243750;
+  --md-on-secondary-container: #D8E6F2;
 
-  --md-tertiary: var(--ember-tertiary-70);
-  --md-on-tertiary: #402d00;
-  --md-tertiary-container: #5c4200;
-  --md-on-tertiary-container: var(--ember-tertiary-90);
+  --md-tertiary: #6AD8DC;
+  --md-on-tertiary: #003B3F;
+  --md-tertiary-container: #005059;
+  --md-on-tertiary-container: #B0EEEF;
 
-  --md-error: #ffb4ab;
-  --md-on-error: #690005;
-  --md-error-container: #93000a;
-  --md-on-error-container: var(--ember-error-90);
+  --md-error: #FCA5A5;
+  --md-on-error: #7F1D1D;
+  --md-error-container: #991B1B;
+  --md-on-error-container: #FEE2E2;
 
-  --md-background: #211a16;
-  --md-on-background: #ede0d9;
-  --md-surface: #211a16;
-  --md-on-surface: #ede0d9;
-  --md-surface-variant: #53433c;
-  --md-on-surface-variant: #d8c2b8;
+  --md-background: #0F1520;
+  --md-on-background: #D5E3F2;
+  --md-surface: #0F1520;
+  --md-on-surface: #D5E3F2;
+  --md-surface-variant: #1C2A3C;
+  --md-on-surface-variant: #9BAFC5;
 
-  --md-surface-container-lowest: #120d0b;
-  --md-surface-container-low: #211a16;
-  --md-surface-container: #251e1a;
-  --md-surface-container-high: #302924;
-  --md-surface-container-highest: #3b332e;
+  --md-surface-container-lowest: #080E18;
+  --md-surface-container-low: #111D2C;
+  --md-surface-container: #162234;
+  --md-surface-container-high: #1C2A3F;
+  --md-surface-container-highest: #22334C;
 
-  --md-outline: #a08d84;
-  --md-outline-variant: #53433c;
+  --md-outline: #5B7490;
+  --md-outline-variant: #1C2A3C;
   --md-shadow-rgb: 0, 0, 0;
 }
 
