@@ -120,6 +120,7 @@ function ActionBtn({
 export function Control() {
   const [pipelineMsg, setPipelineMsg] = useState<string>("");
   const [chaseMsg, setChaseMsg] = useState<string>("");
+  const [backfillMsg, setBackfillMsg] = useState<string>("");
   const [status, setStatus] = useState<Status | null>(null);
 
   useEffect(() => {
@@ -249,6 +250,22 @@ export function Control() {
               variant="outlined"
               icon="stop"
               label="Stop"
+            />
+          </ActionCard>
+
+          <ActionCard
+            icon="history"
+            containerColor="var(--md-tertiary-container)"
+            containerFg="var(--md-on-tertiary-container)"
+            title="Price history backfill"
+            subtitle="Seed 500 days of bhavcopy + index data — runs in background"
+            msg={backfillMsg}
+          >
+            <ActionBtn
+              onClick={() => call("/admin/prices/backfill", "Backfill", setBackfillMsg)}
+              variant="tonal"
+              icon="download"
+              label="Backfill 500 days"
             />
           </ActionCard>
         </div>
