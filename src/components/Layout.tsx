@@ -262,18 +262,12 @@ export function Layout() {
         style={{ borderColor: "var(--md-outline-variant)" }}
       >
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 flex-none">
-          <span
-            className="grid place-items-center w-[36px] h-[36px] rounded-xl text-on-primary"
-            style={{ background: "var(--md-primary)", boxShadow: "0 2px 6px rgba(168,58,29,.35)" }}
-          >
-            <span className="material-symbols-rounded ms-fill" style={{ fontSize: 20 }}>
-              local_fire_department
-            </span>
-          </span>
-          <div className="leading-[1.05]">
-            <div className="text-[17px] font-bold tracking-tight">WIB</div>
-          </div>
+        <Link to="/" className="flex items-center flex-none">
+          <img
+            src={theme === "dark" ? "/logo-dark.png" : "/logo-light.png"}
+            alt="What I Bought"
+            className="h-[34px] w-auto"
+          />
         </Link>
 
         {/* Desktop nav (hidden on mobile) */}
