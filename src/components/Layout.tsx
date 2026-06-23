@@ -8,6 +8,7 @@ type NavItem = { to: string; label: string; icon: string };
 
 const NAV_PUBLIC: NavItem[] = [
   { to: "/today", label: "Today", icon: "today" },
+  { to: "/universe", label: "Universe", icon: "hub" },
   { to: "/history", label: "History", icon: "history" },
   { to: "/leaderboard", label: "Leaderboard", icon: "leaderboard" },
   { to: "/subscribe", label: "Notifications", icon: "notifications_active" },

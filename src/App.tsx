@@ -3,6 +3,7 @@ import { Layout } from "@/components/Layout";
 import { useAuth } from "@/contexts/auth";
 import { Landing } from "@/pages/Landing";
 import { Today } from "@/pages/Today";
+import { Universe } from "@/pages/Universe";
 import { History } from "@/pages/History";
 import { Leaderboard } from "@/pages/Leaderboard";
 import { Lessons } from "@/pages/Lessons";
@@ -36,6 +37,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Landing />} />
         <Route path="/today" element={<RequireAuth><Today /></RequireAuth>} />
+        <Route path="/universe" element={<RequireAuth><Universe /></RequireAuth>} />
         <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
         <Route path="/leaderboard" element={<RequireAuth><Leaderboard /></RequireAuth>} />
         <Route path="/lessons" element={<RequireAdmin><Lessons /></RequireAdmin>} />

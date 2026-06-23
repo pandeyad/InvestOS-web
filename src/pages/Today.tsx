@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
+import { spark } from "@/lib/spark";
 
 type StockScore = {
   symbol: string;
@@ -34,19 +35,6 @@ const STATUS_STYLES: Record<string, { bg: string; fg: string; label: string }> =
   cancelled: { bg: "var(--md-surface-container-high)", fg: "var(--md-on-surface-variant)", label: "Cancelled" },
   pending: { bg: "var(--md-secondary-container)", fg: "var(--md-on-secondary-container)", label: "Pending" },
 };
-
-function spark(mom12: number | null, rsi: number | null): string {
-  const n = 20;
-  const slope = (mom12 ?? 5) / 100;
-  const base = 28 - Math.min(22, Math.max(4, ((rsi ?? 55) / 100) * 22));
-  const pts: string[] = [];
-  for (let i = 0; i < n; i++) {
-    const x = (i / (n - 1)) * 120;
-    const y = Math.max(2, Math.min(30, base - slope * i * 1.3 + Math.sin(i * 1.7) * 2.5 + Math.cos(i * 2.9) * 1.5));
-    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
-  }
-  return pts.join(" ");
-}
 
 const ACTION_META: Record<string, { label: string; bg: string; fg: string; dot: string }> = {
   buy: {
@@ -204,6 +192,13 @@ export function Today() {
       )}
 
       {visible.length > 0 && (
+        <>
+          <div className="flex items-baseline gap-2.5 mb-4">
+            <h2 className="md-title-large m-0 font-medium">Universe analysis</h2>
+            <span className="text-[13px] text-on-surface-variant">
+              {scores.length} stocks ranked by composite score
+            </span>
+          </div>
         <div
           className="bg-surface-container-lowest border rounded-2xl overflow-hidden shadow-card"
           style={{ borderColor: "var(--md-outline-variant)" }}
@@ -304,6 +299,7 @@ export function Today() {
             );
           })}
         </div>
+        </>
       )}
 
       <p className="text-[11.5px] text-on-surface-variant mt-5 leading-relaxed">

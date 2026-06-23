@@ -48,6 +48,9 @@ type Holding = {
   gtt_trigger_id: string | null;
   drastic_drop_flagged: boolean;
   held_since: string | null;
+  // Admin-only: Kite cost basis (qty + avg_buy_price). Absent for viewers.
+  avg_buy_price?: number | null;
+  quantity?: number | null;
 };
 
 type Postmortem = {
@@ -60,6 +63,13 @@ type Postmortem = {
   max_adverse_pct: number | null;
   outcome: string;
   hold_days: number | null;
+};
+
+type Execution = {
+  type: string;          // "BUY" | "SELL"
+  price: number | null;  // actual fill price
+  date: string | null;   // YYYY-MM-DD
+  quantity?: number | null; // admin-only
 };
 
 type StockDetail = {
@@ -75,6 +85,7 @@ type StockDetail = {
   verdict: Verdict | null;
   lead_history: LeadHistoryRow[];
   holding: Holding | null;
+  executions: Execution[];
   postmortem: Postmortem | null;
 };
 
@@ -166,14 +177,49 @@ export function Stock() {
   const isHeld = !!holding;
   const isClosed = !!postmortem && !isHeld;
 
-  // Build reference lines for held/closed positions
-  const buyDate = postmortem?.entry_date ?? holding?.held_since?.slice(0, 10) ?? null;
-  const sellDate = postmortem?.exit_date ?? null;
-
   // Price chart: downsample to max 100 points for mobile performance
   const prices = detail.prices;
   const step = prices.length > 100 ? Math.floor(prices.length / 100) : 1;
   const chartData = prices.filter((_, i) => i % step === 0 || i === prices.length - 1);
+
+  // Snap an execution/marker date to the nearest date present in the downsampled
+  // chart (Recharts category axis needs an exact x match to draw a ReferenceLine).
+  const chartDates = chartData.map((b) => b.date);
+  function snapDate(d: string | null): string | null {
+    if (!d || chartDates.length === 0) return null;
+    if (chartDates.includes(d)) return d;
+    let best = chartDates[0];
+    for (const cd of chartDates) {
+      if (Math.abs(+new Date(cd) - +new Date(d)) < Math.abs(+new Date(best) - +new Date(d))) best = cd;
+    }
+    return best;
+  }
+
+  // Real executions from the BrokerOrder ledger are the canonical markers.
+  // Fall back to inferred postmortem/holding dates only when the ledger is empty.
+  const executions = detail.executions ?? [];
+  const buyExecs = executions.filter((e) => e.type === "BUY");
+  const sellExecs = executions.filter((e) => e.type === "SELL");
+  const buyMarkers = buyExecs.length > 0
+    ? buyExecs.map((e) => ({ x: snapDate(e.date), price: e.price }))
+    : (() => {
+        const d = snapDate(postmortem?.entry_date ?? holding?.held_since?.slice(0, 10) ?? null);
+        return d ? [{ x: d, price: postmortem?.entry_price ?? null }] : [];
+      })();
+  const sellMarkers = sellExecs.length > 0
+    ? sellExecs.map((e) => ({ x: snapDate(e.date), price: e.price }))
+    : (() => {
+        const d = snapDate(postmortem?.exit_date ?? null);
+        return d ? [{ x: d, price: postmortem?.exit_price ?? null }] : [];
+      })();
+  const hasBuy = buyMarkers.length > 0;
+  const hasSell = sellMarkers.length > 0;
+
+  // Avg cost horizontal line: mean of real BUY fills, else Kite cost basis / postmortem entry.
+  const buyFillPrices = buyExecs.map((e) => e.price).filter((p): p is number => p != null);
+  const avgCost = buyFillPrices.length > 0
+    ? buyFillPrices.reduce((a, b) => a + b, 0) / buyFillPrices.length
+    : (holding?.avg_buy_price ?? postmortem?.entry_price ?? null);
 
   const priceAbove200 = detail.current_price != null && detail.dma_200 != null
     ? ((detail.current_price - detail.dma_200) / detail.dma_200) * 100
@@ -265,8 +311,9 @@ export function Stock() {
               200-day price history
             </span>
             <div className="flex items-center gap-4 text-[11.5px] text-on-surface-variant">
-              {buyDate && <span className="flex items-center gap-1.5"><span className="inline-block w-4 h-0 border-t-2 border-dashed" style={{ borderColor: "var(--md-success)" }} />Bought</span>}
-              {sellDate && <span className="flex items-center gap-1.5"><span className="inline-block w-4 h-0 border-t-2 border-dashed" style={{ borderColor: "var(--md-error)" }} />Sold</span>}
+              {hasBuy && <span className="flex items-center gap-1.5"><span className="inline-block w-4 h-0 border-t-2 border-dashed" style={{ borderColor: "var(--md-success)" }} />Bought</span>}
+              {hasSell && <span className="flex items-center gap-1.5"><span className="inline-block w-4 h-0 border-t-2 border-dashed" style={{ borderColor: "var(--md-error)" }} />Sold</span>}
+              {avgCost != null && <span className="flex items-center gap-1.5"><span className="inline-block w-4 h-0 border-t-2 border-dashed" style={{ borderColor: "var(--md-tertiary)" }} />Avg cost</span>}
               {verdict?.run_date && <span>As of {verdict.run_date}</span>}
             </div>
           </div>
@@ -296,22 +343,33 @@ export function Stock() {
                 tickFormatter={(v: number) => `₹${(v / 1000).toFixed(1)}k`}
               />
               <Tooltip content={<PriceTooltip />} />
-              {buyDate && (
+              {buyMarkers.map((m, i) => m.x && (
                 <ReferenceLine
-                  x={buyDate}
+                  key={`buy-${i}`}
+                  x={m.x}
                   stroke="var(--md-success)"
                   strokeDasharray="4 3"
                   strokeWidth={1.5}
-                  label={{ value: "Bought", fill: "var(--md-success)", fontSize: 10, position: "top" }}
+                  label={{ value: i === 0 ? "Bought" : "", fill: "var(--md-success)", fontSize: 10, position: "top" }}
                 />
-              )}
-              {sellDate && (
+              ))}
+              {sellMarkers.map((m, i) => m.x && (
                 <ReferenceLine
-                  x={sellDate}
+                  key={`sell-${i}`}
+                  x={m.x}
                   stroke="var(--md-error)"
                   strokeDasharray="4 3"
                   strokeWidth={1.5}
-                  label={{ value: "Sold", fill: "var(--md-error)", fontSize: 10, position: "top" }}
+                  label={{ value: i === 0 ? "Sold" : "", fill: "var(--md-error)", fontSize: 10, position: "top" }}
+                />
+              ))}
+              {avgCost != null && (
+                <ReferenceLine
+                  y={avgCost}
+                  stroke="var(--md-tertiary)"
+                  strokeDasharray="5 3"
+                  strokeWidth={1.5}
+                  label={{ value: `Avg ${inr(avgCost)}`, fill: "var(--md-tertiary)", fontSize: 10, position: "insideTopRight" }}
                 />
               )}
               <Area
