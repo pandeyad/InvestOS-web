@@ -98,7 +98,7 @@ export function Dashboard() {
         </span>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mb-6">
         <CapitalCard label="Cash" value={fmtINR(d.capital.available_cash)} />
         <CapitalCard label="Invested" value={fmtINR(d.capital.invested)} />
         <CapitalCard label="Current value" value={fmtINR(d.capital.current_value)} />
@@ -114,19 +114,17 @@ export function Dashboard() {
         className="bg-surface-container-low border rounded-2xl overflow-hidden shadow-card"
         style={{ borderColor: "var(--md-outline-variant)" }}
       >
+        {/* Header: 2-col on mobile (symbol + P&L), all 6 on md+ */}
         <div
-          className="grid gap-3 px-6 py-3.5 text-[11.5px] font-semibold uppercase tracking-wide text-on-surface-variant"
-          style={{
-            gridTemplateColumns: "1.2fr 2fr 0.8fr 1fr 1fr 1.1fr",
-            background: "var(--md-surface-container)",
-          }}
+          className="grid grid-cols-[1.2fr_1.1fr] md:grid-cols-[1.2fr_2fr_0.8fr_1fr_1fr_1.1fr] gap-3 px-6 py-3.5 text-[11.5px] font-semibold uppercase tracking-wide text-on-surface-variant"
+          style={{ background: "var(--md-surface-container)" }}
         >
           <span>Symbol</span>
-          <span>Allocation</span>
-          <span className="text-right">Qty</span>
-          <span className="text-right">Avg buy</span>
-          <span className="text-right">Last</span>
-          <span className="text-right">P&L</span>
+          <span className="hidden md:block">Allocation</span>
+          <span className="hidden md:block text-right">Qty</span>
+          <span className="hidden md:block text-right">Avg buy</span>
+          <span className="hidden md:block text-right">Last</span>
+          <span className="text-right">P&amp;L</span>
         </div>
         {d.holdings.length === 0 && (
           <div className="px-6 py-10 text-center text-on-surface-variant">No open holdings.</div>
@@ -138,15 +136,14 @@ export function Dashboard() {
           return (
             <div
               key={h.symbol}
-              className="grid gap-3 px-6 py-3.5 border-t items-center hover:bg-surface-container-high transition-colors animate-row-in"
+              className="grid grid-cols-[1.2fr_1.1fr] md:grid-cols-[1.2fr_2fr_0.8fr_1fr_1fr_1.1fr] gap-3 px-6 py-3.5 border-t items-center hover:bg-surface-container-high transition-colors animate-row-in"
               style={{
-                gridTemplateColumns: "1.2fr 2fr 0.8fr 1fr 1fr 1.1fr",
                 borderColor: "var(--md-outline-variant)",
                 animationDelay: `${i * 30}ms`,
               }}
             >
               <span className="font-mono text-[14.5px] font-medium">{h.symbol}</span>
-              <div className="flex items-center gap-2.5">
+              <div className="hidden md:flex items-center gap-2.5">
                 <div className="flex-1 h-[7px] rounded-full bg-surface-container-high overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-700"
@@ -157,11 +154,11 @@ export function Dashboard() {
                   {allocPct.toFixed(0)}%
                 </span>
               </div>
-              <span className="text-right font-mono text-[13.5px]">{h.quantity}</span>
-              <span className="text-right font-mono text-[13.5px]">
+              <span className="hidden md:block text-right font-mono text-[13.5px]">{h.quantity}</span>
+              <span className="hidden md:block text-right font-mono text-[13.5px]">
                 {h.avg_buy_price.toFixed(2)}
               </span>
-              <span className="text-right font-mono text-[13.5px]">
+              <span className="hidden md:block text-right font-mono text-[13.5px]">
                 {h.last_price?.toFixed(2) ?? "—"}
               </span>
               <span

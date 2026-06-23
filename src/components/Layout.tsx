@@ -68,7 +68,7 @@ export function Layout() {
 
         {user && (
           <nav
-            className="flex items-center gap-[3px] overflow-x-auto flex-1"
+            className="flex items-center gap-[3px] overflow-x-auto flex-1 whitespace-nowrap"
             style={{ scrollbarWidth: "none" }}
           >
             {NAV_PUBLIC.map((it) => (

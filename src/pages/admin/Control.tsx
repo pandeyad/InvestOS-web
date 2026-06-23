@@ -211,10 +211,8 @@ export function Control() {
         <h1 className="md-headline-large m-0">Control</h1>
       </div>
 
-      <div
-        className="grid gap-4.5"
-        style={{ gridTemplateColumns: "1.4fr 1fr", gap: 18 }}
-      >
+      {/* Actions + status: stacked on mobile, side-by-side on md+ */}
+      <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-[18px]">
         <div className="flex flex-col gap-3.5">
           <ActionCard
             icon="rocket_launch"

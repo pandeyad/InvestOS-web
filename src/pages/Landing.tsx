@@ -32,7 +32,7 @@ export function Landing() {
       />
 
       {/* Hero */}
-      <div className="relative max-w-[1100px] mx-auto px-8 pt-20 pb-12">
+      <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 md:px-8 pt-20 pb-12">
         <div
           className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-[12.5px] font-semibold tracking-wide mb-6"
           style={{
@@ -46,8 +46,8 @@ export function Landing() {
         </div>
 
         <h1
-          className="md-display-large m-0 mb-5"
-          style={{ letterSpacing: "-1px", fontWeight: 500, maxWidth: "18ch" }}
+          className="md-display-large m-0 mb-5 max-w-[22ch] sm:max-w-[18ch]"
+          style={{ letterSpacing: "-1px", fontWeight: 500 }}
         >
           My market picks —{" "}
           <span style={{ color: "var(--md-primary)" }}>open for anyone to follow.</span>
@@ -75,7 +75,7 @@ export function Landing() {
       </div>
 
       {/* Stats strip */}
-      <div className="relative max-w-[1100px] mx-auto px-8 mb-10">
+      <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 md:px-8 mb-10">
         <div
           className="flex flex-wrap divide-x rounded-2xl border overflow-hidden bg-surface-container"
           style={{ borderColor: "var(--md-outline-variant)" }}
@@ -89,7 +89,7 @@ export function Landing() {
       </div>
 
       {/* Disclaimer */}
-      <div className="relative max-w-[1100px] mx-auto px-8 py-8 mt-4">
+      <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 md:px-8 py-8 mt-4">
         <p
           className="text-[12px] text-on-surface-variant leading-relaxed"
           style={{ maxWidth: "72ch" }}

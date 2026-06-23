@@ -103,7 +103,7 @@ function EquityCurve({ data }: { data: CurvePoint[] }) {
       </div>
 
       <div className="px-3 pt-2 pb-1">
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", display: "block" }}>
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ maxWidth: "100%", height: "auto", display: "block" }}>
           {/* Y grid + labels */}
           {ticks.map((v) => {
             const y = toY(v, minY, maxY);
@@ -213,15 +213,16 @@ export function History() {
 
       {leads && leads.length > 0 && (
         <div className="bg-surface-container-low border rounded-2xl overflow-hidden shadow-card" style={{ borderColor: "var(--md-outline-variant)" }}>
+          {/* Header: 3-col on mobile (date, symbol, status), all 6 on md+ */}
           <div
-            className="grid gap-3 px-6 py-3.5 text-[11.5px] font-semibold uppercase tracking-wide text-on-surface-variant"
-            style={{ gridTemplateColumns: "90px 1.4fr 1fr 1fr 1fr 1.1fr", background: "var(--md-surface-container)" }}
+            className="grid grid-cols-[90px_1.4fr_1.1fr] md:grid-cols-[90px_1.4fr_1fr_1fr_1fr_1.1fr] gap-3 px-6 py-3.5 text-[11.5px] font-semibold uppercase tracking-wide text-on-surface-variant"
+            style={{ background: "var(--md-surface-container)" }}
           >
             <span>Date</span>
             <span>Symbol</span>
-            <span className="text-right">Entry</span>
-            <span className="text-right">Stop %</span>
-            <span className="text-right">Target %</span>
+            <span className="hidden md:block text-right">Entry</span>
+            <span className="hidden md:block text-right">Stop %</span>
+            <span className="hidden md:block text-right">Target %</span>
             <span className="text-right">Status</span>
           </div>
           {leads.map((r, i) => {
@@ -229,16 +230,16 @@ export function History() {
             return (
               <div
                 key={r.id}
-                className="grid gap-3 px-6 py-4 border-t items-center transition-colors hover:bg-surface-container-high animate-row-in"
-                style={{ gridTemplateColumns: "90px 1.4fr 1fr 1fr 1fr 1.1fr", borderColor: "var(--md-outline-variant)", animationDelay: `${i * 30}ms` }}
+                className="grid grid-cols-[90px_1.4fr_1.1fr] md:grid-cols-[90px_1.4fr_1fr_1fr_1fr_1.1fr] gap-3 px-6 py-4 border-t items-center transition-colors hover:bg-surface-container-high animate-row-in"
+                style={{ borderColor: "var(--md-outline-variant)", animationDelay: `${i * 30}ms` }}
               >
                 <span className="text-[13px] text-on-surface-variant">{r.created_at.slice(0, 10)}</span>
                 <span className="font-mono text-[14.5px] font-medium">{r.symbol}</span>
-                <span className="text-right font-mono text-[13.5px]">{r.entry_price?.toFixed(2) ?? "—"}</span>
-                <span className="text-right font-mono text-[13.5px]" style={{ color: "var(--md-error)" }}>
+                <span className="hidden md:block text-right font-mono text-[13.5px]">{r.entry_price?.toFixed(2) ?? "—"}</span>
+                <span className="hidden md:block text-right font-mono text-[13.5px]" style={{ color: "var(--md-error)" }}>
                   {r.stop_pct != null ? `${r.stop_pct.toFixed(2)}%` : "—"}
                 </span>
-                <span className="text-right font-mono text-[13.5px]" style={{ color: "var(--md-success)" }}>
+                <span className="hidden md:block text-right font-mono text-[13.5px]" style={{ color: "var(--md-success)" }}>
                   {r.target_pct != null ? `+${r.target_pct.toFixed(2)}%` : "—"}
                 </span>
                 <span className="text-right">

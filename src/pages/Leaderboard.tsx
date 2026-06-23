@@ -109,7 +109,8 @@ export function Leaderboard() {
     <div className="max-w-[1100px] mx-auto px-8 py-10 pb-20 animate-view-in">
       <h1 className="md-headline-large m-0 mb-6">Leaderboard</h1>
 
-      <div className="grid gap-4.5 mb-4.5" style={{ gridTemplateColumns: "300px 1fr", gap: 18 }}>
+      {/* Gauge + stats: stacked on mobile, side-by-side on md+ */}
+      <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-[18px] mb-[18px]">
         {/* Gauge card */}
         <div
           className="bg-surface-container-low border rounded-2xl p-6 flex flex-col items-center justify-center shadow-card"
@@ -122,11 +123,8 @@ export function Leaderboard() {
           </div>
         </div>
 
-        {/* Stat grid */}
-        <div
-          className="grid"
-          style={{ gridTemplateColumns: "repeat(3, 1fr)", gridTemplateRows: "1fr 1fr", gap: 14 }}
-        >
+        {/* Stat grid: 2-col on mobile, 3-col on md+ */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-[14px]">
           <StatTile label="Trades logged" value={String(agg?.lead_count ?? 0)} />
           <StatTile label="Avg return" value={fmtPct(agg?.avg_return_pct ?? null, true)} color={gain} />
           <StatTile
@@ -139,37 +137,35 @@ export function Leaderboard() {
         </div>
       </div>
 
+      {/* Per-stock table */}
       <div
         className="bg-surface-container-low border rounded-2xl overflow-hidden shadow-card"
         style={{ borderColor: "var(--md-outline-variant)" }}
       >
+        {/* Header: 2-col on mobile (symbol + return), all 6 on md+ */}
         <div
-          className="grid gap-3 px-6 py-3.5 text-[11.5px] font-semibold uppercase tracking-wide text-on-surface-variant"
-          style={{
-            gridTemplateColumns: "1.3fr 2fr 0.8fr 0.9fr 0.9fr 0.9fr",
-            background: "var(--md-surface-container)",
-          }}
+          className="grid grid-cols-[1.3fr_0.9fr] md:grid-cols-[1.3fr_2fr_0.8fr_0.9fr_0.9fr_0.9fr] gap-3 px-6 py-3.5 text-[11.5px] font-semibold uppercase tracking-wide text-on-surface-variant"
+          style={{ background: "var(--md-surface-container)" }}
         >
           <span>Symbol</span>
-          <span>Win rate</span>
-          <span className="text-right">Trades</span>
+          <span className="hidden md:block">Win rate</span>
+          <span className="hidden md:block text-right">Trades</span>
           <span className="text-right">Avg</span>
-          <span className="text-right">Best</span>
-          <span className="text-right">Worst</span>
+          <span className="hidden md:block text-right">Best</span>
+          <span className="hidden md:block text-right">Worst</span>
         </div>
         {perStock?.length ? (
           perStock.map((p, i) => (
             <div
               key={p.symbol}
-              className="grid gap-3 px-6 py-3.5 border-t items-center transition-colors hover:bg-surface-container-high animate-row-in"
+              className="grid grid-cols-[1.3fr_0.9fr] md:grid-cols-[1.3fr_2fr_0.8fr_0.9fr_0.9fr_0.9fr] gap-3 px-6 py-3.5 border-t items-center transition-colors hover:bg-surface-container-high animate-row-in"
               style={{
-                gridTemplateColumns: "1.3fr 2fr 0.8fr 0.9fr 0.9fr 0.9fr",
                 borderColor: "var(--md-outline-variant)",
                 animationDelay: `${i * 30}ms`,
               }}
             >
               <span className="font-mono text-[14.5px] font-medium">{p.symbol}</span>
-              <div className="flex items-center gap-2.5">
+              <div className="hidden md:flex items-center gap-2.5">
                 <div className="flex-1 h-[7px] rounded-full bg-surface-container-high overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-700"
@@ -183,18 +179,18 @@ export function Leaderboard() {
                   {p.win_rate != null ? `${p.win_rate.toFixed(0)}%` : "—"}
                 </span>
               </div>
-              <span className="text-right text-[13.5px]">{p.trades}</span>
+              <span className="hidden md:block text-right text-[13.5px]">{p.trades}</span>
               <span className="text-right font-mono text-[13.5px]">
                 {fmtPct(p.avg_return_pct, true)}
               </span>
               <span
-                className="text-right font-mono text-[13.5px]"
+                className="hidden md:block text-right font-mono text-[13.5px]"
                 style={{ color: gain }}
               >
                 {fmtPct(p.best_return_pct, true)}
               </span>
               <span
-                className="text-right font-mono text-[13.5px]"
+                className="hidden md:block text-right font-mono text-[13.5px]"
                 style={{ color: loss }}
               >
                 {fmtPct(p.worst_return_pct)}
