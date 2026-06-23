@@ -201,7 +201,7 @@ export function Control() {
   ];
 
   return (
-    <div className="max-w-[1100px] mx-auto px-8 py-10 pb-20 animate-view-in">
+    <div className="max-w-[1100px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-28 md:pb-20 animate-view-in">
       <div className="flex items-center gap-2.5 mb-6">
         <span
           className="material-symbols-rounded ms-fill"

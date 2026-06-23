@@ -45,7 +45,7 @@ export function Subscribe() {
   const topic = "whatibought-picks";
 
   return (
-    <div className="max-w-[680px] mx-auto px-8 py-10 pb-20 animate-view-in">
+    <div className="max-w-[680px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-28 md:pb-20 animate-view-in">
       <div className="flex items-center gap-3 mb-2">
         <span
           className="grid place-items-center w-11 h-11 rounded-xl flex-none"

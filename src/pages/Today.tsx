@@ -167,7 +167,7 @@ export function Today() {
   });
 
   return (
-    <div className="max-w-[1100px] mx-auto px-8 py-10 pb-20 animate-view-in">
+    <div className="max-w-[1100px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-28 md:pb-20 animate-view-in">
       <div className="flex items-end justify-between gap-5 flex-wrap mb-7">
         <div>
           <h1 className="md-headline-large m-0">Today's trades</h1>

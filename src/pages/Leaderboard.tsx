@@ -106,7 +106,7 @@ export function Leaderboard() {
     v == null ? "—" : `${sign && v > 0 ? "+" : ""}${v.toFixed(1)}%`;
 
   return (
-    <div className="max-w-[1100px] mx-auto px-8 py-10 pb-20 animate-view-in">
+    <div className="max-w-[1100px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-28 md:pb-20 animate-view-in">
       <h1 className="md-headline-large m-0 mb-6">Leaderboard</h1>
 
       {/* Gauge + stats: stacked on mobile, side-by-side on md+ */}

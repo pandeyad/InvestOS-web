@@ -20,7 +20,7 @@ export function Lessons() {
   const accentContainer = "var(--md-primary-container)";
 
   return (
-    <div className="max-w-[880px] mx-auto px-8 py-10 pb-20 animate-view-in">
+    <div className="max-w-[880px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-28 md:pb-20 animate-view-in">
       <h1 className="md-headline-large m-0 mb-1.5">Lessons</h1>
       <p className="md-body-medium text-on-surface-variant mb-6 m-0">
         Rules distilled from closed trades. They update as the journal grows.

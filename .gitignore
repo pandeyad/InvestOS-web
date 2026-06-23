@@ -6,3 +6,5 @@ dist/
 .vercel/
 *.log
 .DS_Store
+tsconfig.tsbuildinfo
+src/**/*.js
