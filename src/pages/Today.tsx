@@ -27,6 +27,27 @@ type ScreenData = {
   scores: StockScore[];
 };
 
+const STATUS_STYLES: Record<string, { bg: string; fg: string; label: string }> = {
+  placed: { bg: "var(--md-primary-container)", fg: "var(--md-on-primary-container)", label: "Placed" },
+  filled: { bg: "var(--md-success-container)", fg: "var(--md-success)", label: "Filled" },
+  rejected: { bg: "var(--md-error-container)", fg: "var(--md-on-error-container)", label: "Rejected" },
+  cancelled: { bg: "var(--md-surface-container-high)", fg: "var(--md-on-surface-variant)", label: "Cancelled" },
+  pending: { bg: "var(--md-secondary-container)", fg: "var(--md-on-secondary-container)", label: "Pending" },
+};
+
+function spark(mom12: number | null, rsi: number | null): string {
+  const n = 20;
+  const slope = (mom12 ?? 5) / 100;
+  const base = 28 - Math.min(22, Math.max(4, ((rsi ?? 55) / 100) * 22));
+  const pts: string[] = [];
+  for (let i = 0; i < n; i++) {
+    const x = (i / (n - 1)) * 120;
+    const y = Math.max(2, Math.min(30, base - slope * i * 1.3 + Math.sin(i * 1.7) * 2.5 + Math.cos(i * 2.9) * 1.5));
+    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+  }
+  return pts.join(" ");
+}
+
 const ACTION_META: Record<string, { label: string; bg: string; fg: string; dot: string }> = {
   buy: {
     label: "Buy",
@@ -99,6 +120,8 @@ export function Today() {
     ? scores
     : scores.filter((s) => s.action === filter);
 
+  const leads = scores.filter((s) => s.action === "buy");
+
   const runDate = data?.run_date;
   const isStale = runDate && runDate < new Date().toISOString().slice(0, 10);
 
@@ -166,6 +189,18 @@ export function Today() {
           title="No screen data yet"
           subtitle="The premarket pipeline runs at 08:30 IST Mon–Fri"
         />
+      )}
+
+      {/* Lead cards */}
+      {leads.length > 0 && (
+        <div className="mb-8">
+          <h2 className="md-title-large m-0 mb-4 font-medium">Today's picks</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
+            {leads.map((s, i) => (
+              <LeadCard key={s.symbol} s={s} i={i} onClick={() => navigate(`/stock/${s.symbol}`)} />
+            ))}
+          </div>
+        </div>
       )}
 
       {visible.length > 0 && (
@@ -297,6 +332,88 @@ function SummaryPill({
       <span className="font-mono text-[15px]">{value}</span>
       {label}
     </button>
+  );
+}
+
+function LeadCard({ s, i, onClick }: { s: StockScore; i: number; onClick: () => void }) {
+  const conv = s.conviction != null ? Math.round(s.conviction * 100) : null;
+  const statusStyle = s.lead_status ? (STATUS_STYLES[s.lead_status] ?? null) : null;
+  return (
+    <div
+      onClick={onClick}
+      className="cursor-pointer bg-surface-container-low border rounded-[18px] p-[22px] shadow-card transition-all duration-250 animate-card-in"
+      style={{ borderColor: "var(--md-outline-variant)", animationDelay: `${i * 60}ms` }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-3px)";
+        e.currentTarget.style.boxShadow = "0 10px 24px rgba(60,28,16,.16)";
+        e.currentTarget.style.borderColor = "var(--md-primary)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "";
+        e.currentTarget.style.boxShadow = "";
+        e.currentTarget.style.borderColor = "var(--md-outline-variant)";
+      }}
+    >
+      <div className="flex items-start justify-between gap-3 mb-3.5">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <span className="font-mono text-[21px] font-medium tracking-tight">{s.symbol}</span>
+            <span
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
+              style={{ background: "var(--md-surface-container-high)", color: "var(--md-on-surface-variant)" }}
+            >
+              <span className="material-symbols-rounded" style={{ fontSize: 13 }}>north_east</span>Long
+            </span>
+          </div>
+          <div className="text-[12.5px] text-on-surface-variant mt-0.5">{s.sector ?? "—"}</div>
+        </div>
+        {statusStyle && (
+          <span className="px-3 py-1 rounded-full text-[12px] font-semibold flex-none"
+            style={{ background: statusStyle.bg, color: statusStyle.fg }}>
+            {statusStyle.label}
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-3 gap-2.5 mb-4">
+        <div className="text-center px-2 py-2.5 rounded-xl" style={{ background: "var(--md-surface-container-high)" }}>
+          <div className="text-[11px] text-on-surface-variant mb-1">Entry</div>
+          <div className="font-mono text-[14px] font-medium">{s.entry_price != null ? `₹${s.entry_price.toFixed(0)}` : "—"}</div>
+        </div>
+        <div className="text-center px-2 py-2.5 rounded-xl" style={{ background: "var(--md-surface-container-high)" }}>
+          <div className="text-[11px] text-on-surface-variant mb-1">Stop</div>
+          <div className="font-mono text-[14px] font-medium" style={{ color: "var(--md-error)" }}>{s.stop_price != null ? `₹${s.stop_price.toFixed(0)}` : "—"}</div>
+          <div className="font-mono text-[11px]" style={{ color: "var(--md-error)" }}>{s.stop_pct != null ? `${s.stop_pct.toFixed(1)}%` : ""}</div>
+        </div>
+        <div className="text-center px-2 py-2.5 rounded-xl" style={{ background: "var(--md-surface-container-high)" }}>
+          <div className="text-[11px] text-on-surface-variant mb-1">Target</div>
+          <div className="font-mono text-[14px] font-medium" style={{ color: "var(--md-success)" }}>{s.target_price != null ? `₹${s.target_price.toFixed(0)}` : "—"}</div>
+          <div className="font-mono text-[11px]" style={{ color: "var(--md-success)" }}>{s.target_pct != null ? `+${s.target_pct.toFixed(1)}%` : ""}</div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2.5 mb-3.5">
+        <span className="text-[12px] text-on-surface-variant whitespace-nowrap">Conviction</span>
+        <div className="flex-1 h-[7px] rounded-full overflow-hidden" style={{ background: "var(--md-surface-container-high)" }}>
+          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${conv ?? 0}%`, background: "var(--md-primary)" }} />
+        </div>
+        <span className="font-mono text-[13px] font-semibold" style={{ color: "var(--md-primary)" }}>{conv != null ? `${conv}%` : "—"}</span>
+      </div>
+
+      {s.rationale && (
+        <p className="text-[13px] leading-[1.55] text-on-surface-variant mb-3.5 line-clamp-3 m-0">{s.rationale}</p>
+      )}
+
+      <div className="flex items-center gap-3 pt-3.5 border-t" style={{ borderColor: "var(--md-outline-variant)" }}>
+        <svg viewBox="0 0 120 32" preserveAspectRatio="none" style={{ width: 120, height: 32, flexShrink: 0, overflow: "visible" }}>
+          <polyline points={spark(s.mom_12_1, s.rsi_14)} fill="none" stroke="var(--md-primary)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span className="text-[12px] text-on-surface-variant">20-day trend</span>
+        <span className="ml-auto inline-flex items-center gap-1 text-[12.5px] font-semibold" style={{ color: "var(--md-primary)" }}>
+          Details<span className="material-symbols-rounded" style={{ fontSize: 16 }}>arrow_forward</span>
+        </span>
+      </div>
+    </div>
   );
 }
 

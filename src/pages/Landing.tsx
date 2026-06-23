@@ -88,6 +88,53 @@ export function Landing() {
         </div>
       </div>
 
+      {/* Feature cards */}
+      <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 md:px-8 pb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-[18px]">
+          {[
+            {
+              icon: "filter_alt",
+              bg: "var(--md-primary-container)",
+              fg: "var(--md-on-primary-container)",
+              title: "Pre-market funnel",
+              desc: "A deterministic screen ranks the universe to a shortlist, then reasoning picks the day's leads at 08:30.",
+              delay: "60ms",
+            },
+            {
+              icon: "stairs",
+              bg: "var(--md-tertiary-container)",
+              fg: "var(--md-on-tertiary-container)",
+              title: "Trailing-stop exits",
+              desc: "Positions ride a chase loop intraday — stops trail winners and cut losers mechanically, no second-guessing.",
+              delay: "140ms",
+            },
+            {
+              icon: "history_edu",
+              bg: "var(--md-secondary-container)",
+              fg: "var(--md-on-secondary-container)",
+              title: "Honest track record",
+              desc: "Wins and losses, hold times, and the lessons distilled from closed trades — nothing cherry-picked.",
+              delay: "220ms",
+            },
+          ].map((f) => (
+            <div
+              key={f.title}
+              className="bg-surface-container-low border rounded-[18px] p-6 shadow-card animate-card-in"
+              style={{ borderColor: "var(--md-outline-variant)", animationDelay: f.delay }}
+            >
+              <span
+                className="grid place-items-center w-11 h-11 rounded-[13px] mb-3.5"
+                style={{ background: f.bg, color: f.fg }}
+              >
+                <span className="material-symbols-rounded">{f.icon}</span>
+              </span>
+              <div className="md-title-medium mb-1.5">{f.title}</div>
+              <p className="md-body-medium m-0 text-on-surface-variant leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Disclaimer */}
       <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 md:px-8 py-8 mt-4">
         <p

@@ -257,16 +257,18 @@ export function Stock() {
       {/* Price chart */}
       {chartData.length > 1 && (
         <div
-          className="bg-surface-container-lowest border rounded-2xl p-4 mb-6"
+          className="bg-surface-container-low border rounded-2xl p-4 mb-6"
           style={{ borderColor: "var(--md-outline-variant)" }}
         >
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <span className="text-[12.5px] font-semibold text-on-surface-variant uppercase tracking-wide">
               200-day price history
             </span>
-            {verdict?.run_date && (
-              <span className="text-[11.5px] text-on-surface-variant">As of {verdict.run_date}</span>
-            )}
+            <div className="flex items-center gap-4 text-[11.5px] text-on-surface-variant">
+              {buyDate && <span className="flex items-center gap-1.5"><span className="inline-block w-4 h-0 border-t-2 border-dashed" style={{ borderColor: "var(--md-success)" }} />Bought</span>}
+              {sellDate && <span className="flex items-center gap-1.5"><span className="inline-block w-4 h-0 border-t-2 border-dashed" style={{ borderColor: "var(--md-error)" }} />Sold</span>}
+              {verdict?.run_date && <span>As of {verdict.run_date}</span>}
+            </div>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
