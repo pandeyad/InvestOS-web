@@ -125,11 +125,8 @@ export function Control() {
 
   useEffect(() => {
     const tick = () => {
-      // /status is open (no auth required in current backend) — read directly
-      const base = import.meta.env.VITE_API_BASE || "http://localhost:8000";
-      fetch(`${base}/status`, { credentials: "include" })
-        .then((r) => r.json())
-        .then((d) => setStatus(d as Status))
+      api<Status>("/status")
+        .then((r) => setStatus(r.data))
         .catch(() => {});
     };
     tick();
