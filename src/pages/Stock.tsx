@@ -31,6 +31,7 @@ type Verdict = {
   target_price: number | null;
   stop_pct: number | null;
   target_pct: number | null;
+  factors?: Record<string, number | null> | null;
 };
 
 type LeadHistoryRow = {
@@ -95,6 +96,15 @@ const ACTION_META: Record<string, { label: string; bg: string; fg: string }> = {
   avoid: { label: "Skip", bg: "var(--md-surface-container-high)", fg: "var(--md-on-surface-variant)" },
 };
 
+const FACTOR_LABELS: [string, string][] = [
+  ["mom_12_1", "12-1M mom"],
+  ["mom_3m", "3M mom"],
+  ["rev_signal", "Reversal"],
+  ["trend_score", "Trend"],
+  ["low_vol", "Low vol"],
+  ["qual_score", "Quality"],
+];
+
 const STATUS_STYLES: Record<string, { bg: string; fg: string; label: string }> = {
   placed: { bg: "var(--md-primary-container)", fg: "var(--md-on-primary-container)", label: "Placed" },
   filled: { bg: "var(--md-success-container)", fg: "var(--md-success)", label: "Filled" },
@@ -147,7 +157,12 @@ export function Stock() {
   const [detail, setDetail] = useState<StockDetail | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
-  const from = searchParams.get("from") ?? "today";
+  const BACK: Record<string, { to: string; label: string }> = {
+    today: { to: "/today", label: "today" },
+    universe: { to: "/universe", label: "universe" },
+    history: { to: "/history", label: "history" },
+  };
+  const back = BACK[searchParams.get("from") ?? "today"] ?? BACK.today;
 
   useEffect(() => {
     if (!symbol) return;
@@ -229,12 +244,12 @@ export function Stock() {
     <div className="max-w-[960px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-28 md:pb-20 animate-view-in">
       {/* Back button */}
       <button
-        onClick={() => navigate(from === "history" ? "/history" : "/today")}
+        onClick={() => navigate(back.to)}
         className="flex items-center gap-1.5 text-[13px] font-medium mb-6 transition-colors"
         style={{ color: "var(--md-on-surface-variant)" }}
       >
         <span className="material-symbols-rounded" style={{ fontSize: 18 }}>arrow_back</span>
-        Back to {from === "history" ? "history" : "today"}
+        Back to {back.label}
       </button>
 
       {/* Header */}
@@ -436,6 +451,39 @@ export function Stock() {
                   style={{ background: "var(--md-surface-container)", color: "var(--md-on-surface)" }}
                 >
                   {verdict.rationale}
+                </div>
+              )}
+
+              {/* Factor breakdown */}
+              {verdict.factors && Object.values(verdict.factors).some((v) => v != null) && (
+                <div className="mt-4">
+                  <div className="text-[11.5px] font-semibold uppercase tracking-wide text-on-surface-variant mb-2.5">
+                    Factor scores (z-scored)
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {FACTOR_LABELS.filter(([k]) => verdict.factors?.[k] != null).map(([k, label]) => {
+                      const v = verdict.factors![k] as number;
+                      const clamped = Math.max(-2.5, Math.min(2.5, v));
+                      const widthPct = (Math.abs(clamped) / 2.5) * 50;
+                      const pos = v >= 0;
+                      return (
+                        <div key={k} className="flex items-center gap-2.5">
+                          <span className="text-[12px] text-on-surface-variant w-[88px] flex-none">{label}</span>
+                          <div className="flex-1 h-[8px] rounded-full relative overflow-hidden" style={{ background: "var(--md-surface-container-high)" }}>
+                            <div className="absolute top-0 bottom-0" style={{ left: "50%", width: 1, background: "var(--md-outline-variant)" }} />
+                            <div className="absolute top-0 bottom-0 rounded-full" style={{
+                              [pos ? "left" : "right"]: "50%",
+                              width: `${widthPct}%`,
+                              background: pos ? "var(--md-success)" : "var(--md-error)",
+                            } as React.CSSProperties} />
+                          </div>
+                          <span className="font-mono text-[12px] font-semibold w-[42px] text-right flex-none" style={{ color: pos ? "var(--md-success)" : "var(--md-error)" }}>
+                            {v >= 0 ? "+" : ""}{v.toFixed(2)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </Section>

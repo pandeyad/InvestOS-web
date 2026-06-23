@@ -164,7 +164,7 @@ export function Universe() {
       {visible.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[14px]">
           {visible.map((s, i) => (
-            <UniverseCard key={s.symbol} s={s} i={i} onClick={() => navigate(`/stock/${s.symbol}`)} />
+            <UniverseCard key={s.symbol} s={s} i={i} onClick={() => navigate(`/stock/${s.symbol}?from=universe`)} />
           ))}
         </div>
       )}

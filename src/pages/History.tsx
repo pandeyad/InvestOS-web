@@ -24,6 +24,18 @@ type CurvePoint = {
   regime: string | null;
 };
 
+type Holding = {
+  symbol: string;
+  name: string | null;
+  sector: string | null;
+  entry_price: number | null;
+  current_price: number | null;
+  gain_pct: number | null;
+  buy_date: string | null;
+  held_since: string | null;
+  quantity: number | null;
+};
+
 const DAY_OPTIONS = [
   { d: 7, label: "7d" },
   { d: 30, label: "30d" },
@@ -156,6 +168,7 @@ export function History() {
   const [days, setDays] = useState(30);
   const [leads, setLeads] = useState<Lead[] | null>(null);
   const [curve, setCurve] = useState<CurvePoint[] | null>(null);
+  const [holdings, setHoldings] = useState<Holding[] | null>(null);
 
   useEffect(() => {
     setLeads(null);
@@ -164,11 +177,51 @@ export function History() {
 
   useEffect(() => {
     api<CurvePoint[]>("/public/portfolio/curve").then((r) => setCurve(r.data ?? []));
+    api<Holding[]>("/public/holdings").then((r) => setHoldings(r.data ?? []));
   }, []);
 
   return (
     <div className="max-w-[1100px] mx-auto px-4 md:px-8 py-6 md:py-10 pb-28 md:pb-20 animate-view-in">
       {curve !== null && curve.length > 1 && <EquityCurve data={curve} />}
+
+      {/* Current holdings */}
+      {holdings && holdings.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-baseline gap-2.5 mb-4">
+            <h2 className="md-title-large m-0 font-medium">Current holdings</h2>
+            <span className="text-[13px] text-on-surface-variant">{holdings.length} open position{holdings.length === 1 ? "" : "s"}</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[14px]">
+            {holdings.map((h, i) => (
+              <div
+                key={h.symbol}
+                onClick={() => navigate(`/stock/${h.symbol}?from=history`)}
+                className="cursor-pointer bg-surface-container-low border rounded-[16px] p-4 shadow-card transition-all duration-200 animate-card-in"
+                style={{ borderColor: "var(--md-outline-variant)", animationDelay: `${i * 30}ms` }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--md-primary)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--md-outline-variant)"; e.currentTarget.style.transform = ""; }}
+              >
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <span className="font-mono text-[16px] font-semibold tracking-tight">{h.symbol}</span>
+                  {h.gain_pct != null && (
+                    <span className="font-mono text-[13px] font-semibold" style={{ color: h.gain_pct >= 0 ? "var(--md-success)" : "var(--md-error)" }}>
+                      {h.gain_pct >= 0 ? "+" : ""}{h.gain_pct.toFixed(1)}%
+                    </span>
+                  )}
+                </div>
+                <div className="text-[11.5px] text-on-surface-variant truncate mb-2.5">{h.sector ?? h.name ?? "—"}</div>
+                <div className="flex items-center gap-3 text-[11.5px]">
+                  <span className="flex items-center gap-1"><span className="text-on-surface-variant">Buy</span><span className="font-mono font-semibold">{h.entry_price != null ? `₹${h.entry_price.toFixed(2)}` : "—"}</span></span>
+                  <span className="flex items-center gap-1"><span className="text-on-surface-variant">Now</span><span className="font-mono font-semibold">{h.current_price != null ? `₹${h.current_price.toFixed(2)}` : "—"}</span></span>
+                </div>
+                {(h.buy_date || h.held_since) && (
+                  <div className="text-[10.5px] text-on-surface-variant mt-2">Held since {h.buy_date ?? h.held_since}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex items-end justify-between gap-4 flex-wrap mb-6">
         <div>

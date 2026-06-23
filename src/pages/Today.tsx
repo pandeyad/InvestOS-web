@@ -185,7 +185,7 @@ export function Today() {
           <h2 className="md-title-large m-0 mb-4 font-medium">Today's picks</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-[18px]">
             {leads.map((s, i) => (
-              <LeadCard key={s.symbol} s={s} i={i} onClick={() => navigate(`/stock/${s.symbol}`)} />
+              <LeadCard key={s.symbol} s={s} i={i} onClick={() => navigate(`/stock/${s.symbol}?from=today`)} />
             ))}
           </div>
         </div>
@@ -235,7 +235,7 @@ export function Today() {
                   gap: "12px",
                   background: isBuy ? "color-mix(in srgb, var(--md-primary-container) 18%, transparent)" : "transparent",
                 }}
-                onClick={() => navigate(`/stock/${s.symbol}`)}
+                onClick={() => navigate(`/stock/${s.symbol}?from=today`)}
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--md-surface-container)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = isBuy ? "color-mix(in srgb, var(--md-primary-container) 18%, transparent)" : "transparent")}
               >
