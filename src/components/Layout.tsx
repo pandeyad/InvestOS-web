@@ -262,12 +262,13 @@ export function Layout() {
         style={{ borderColor: "var(--md-outline-variant)" }}
       >
         {/* Logo */}
-        <Link to="/" className="flex items-center flex-none">
+        <Link to="/" className="flex items-center gap-2 flex-none">
           <img
-            src={theme === "dark" ? "/logo-dark.png" : "/logo-light.png"}
-            alt="What I Bought"
-            className="h-[34px] w-auto"
+            src={theme === "dark" ? "/icon-dark.png" : "/icon-light.png"}
+            alt=""
+            className="h-[34px] w-[34px] object-contain"
           />
+          <span className="text-[17px] font-bold tracking-tight hidden sm:block">What I Bought</span>
         </Link>
 
         {/* Desktop nav (hidden on mobile) */}
