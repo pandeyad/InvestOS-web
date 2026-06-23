@@ -255,14 +255,20 @@ export function Control() {
             containerColor="var(--md-tertiary-container)"
             containerFg="var(--md-on-tertiary-container)"
             title="Price history backfill"
-            subtitle="Seed 500 days of bhavcopy + index data — runs in background"
+            subtitle="Seed 500 days of OHLCV — runs in background"
             msg={backfillMsg}
           >
             <ActionBtn
-              onClick={() => call("/admin/prices/backfill", "Backfill", setBackfillMsg)}
+              onClick={() => call("/admin/prices/backfill-kite", "Kite backfill", setBackfillMsg)}
+              variant="filled"
+              icon="bolt"
+              label="Kite (fast)"
+            />
+            <ActionBtn
+              onClick={() => call("/admin/prices/backfill", "Bhavcopy backfill", setBackfillMsg)}
               variant="tonal"
               icon="download"
-              label="Backfill 500 days"
+              label="Bhavcopy"
             />
           </ActionCard>
         </div>
