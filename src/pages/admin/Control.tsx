@@ -127,7 +127,12 @@ export function Control() {
   const [autobuyMsg, setAutobuyMsg] = useState<string>("");
 
   const refreshStatus = () =>
-    api<Status>("/status").then((r) => setStatus(r.data)).catch(() => {});
+    // /status is the one legacy route that returns a RAW StatusOut (shared with
+    // the in-repo PWA), not the {data,...} envelope every other endpoint uses.
+    // Accept both: enveloped → r.data, raw → r itself.
+    api<Status>("/status")
+      .then((r) => setStatus(((r.data ?? r) as unknown) as Status))
+      .catch(() => {});
 
   useEffect(() => {
     refreshStatus();
