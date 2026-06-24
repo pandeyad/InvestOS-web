@@ -16,6 +16,14 @@ type ChaseStatus = {
   stats?: ChaseStats;
 };
 
+type LastRun = {
+  as_of?: string;
+  posture?: string;
+  leads?: unknown[];
+  orders_placed?: number;
+  shortlist?: unknown[];
+} | null;
+
 type Status = {
   region: string;
   region_source: string;
@@ -26,7 +34,7 @@ type Status = {
   llm_providers_available: string[];
   open_positions: number;
   available_capital: number;
-  last_pipeline_run: unknown;
+  last_pipeline_run: LastRun;
   last_gtt_reconcile: unknown;
   holdings_without_gtt: string[];
   chase: ChaseStatus | null;
@@ -161,6 +169,20 @@ export function Control() {
     }
   }
 
+  async function toggleChase(running: boolean) {
+    const action = running ? "stop" : "start";
+    setChaseMsg(running ? "Stopping…" : "Starting…");
+    try {
+      await api(`/admin/chase/${action}`, { method: "POST" });
+      setChaseMsg(running ? "Chase stopped" : "Chase started");
+      await refreshStatus();
+      // Connecting the ticker takes a moment — re-poll so the card settles.
+      setTimeout(refreshStatus, 2000);
+    } catch (e) {
+      setChaseMsg(`Failed: ${e}`);
+    }
+  }
+
   const accent = "var(--md-primary)";
   const okDot = "var(--md-success)";
   const warnDot = "var(--md-error)";
@@ -263,7 +285,11 @@ export function Control() {
             containerColor="var(--md-primary-container)"
             containerFg="var(--md-on-primary-container)"
             title="Premarket pipeline"
-            subtitle="Funnel → shortlist → leads"
+            subtitle={
+              status?.last_pipeline_run?.as_of
+                ? `Last run ${status.last_pipeline_run.as_of} · ${status.last_pipeline_run.leads?.length ?? 0} leads, ${status.last_pipeline_run.orders_placed ?? 0} placed`
+                : "Funnel → shortlist → leads (not yet run)"
+            }
             msg={pipelineMsg}
           >
             <ActionBtn
@@ -276,24 +302,31 @@ export function Control() {
 
           <ActionCard
             icon="sensors"
-            containerColor="var(--md-secondary-container)"
-            containerFg="var(--md-on-secondary-container)"
+            containerColor={status?.chase?.running ? "var(--md-success-container)" : "var(--md-surface-container-high)"}
+            containerFg={status?.chase?.running ? "var(--md-success)" : "var(--md-on-surface-variant)"}
             title="Chase loop"
-            subtitle="Intraday trailing-stop engine"
+            subtitle={
+              status?.chase?.running
+                ? `RUNNING · ${status.chase.subscribed_count} symbol${status.chase.subscribed_count === 1 ? "" : "s"}${status.chase.degraded ? " · degraded" : ""}`
+                : "STOPPED — no intraday trailing stops"
+            }
             msg={chaseMsg}
           >
-            <ActionBtn
-              onClick={() => call("/admin/chase/start", "Chase start", setChaseMsg)}
-              variant="tonal"
-              icon="play_arrow"
-              label="Start"
-            />
-            <ActionBtn
-              onClick={() => call("/admin/chase/stop", "Chase stop", setChaseMsg)}
-              variant="outlined"
-              icon="stop"
-              label="Stop"
-            />
+            {status?.chase?.running ? (
+              <ActionBtn
+                onClick={() => toggleChase(true)}
+                variant="filled"
+                icon="stop"
+                label="Stop"
+              />
+            ) : (
+              <ActionBtn
+                onClick={() => toggleChase(false)}
+                variant="tonal"
+                icon="play_arrow"
+                label="Start"
+              />
+            )}
           </ActionCard>
 
           <ActionCard
