@@ -73,6 +73,29 @@ type Execution = {
   quantity?: number | null; // admin-only
 };
 
+type Fundamentals = {
+  pe: number | null;
+  roe: number | null;
+  roce: number | null;
+  debt_to_equity: number | null;
+  sales_growth_3y: number | null;
+  profit_growth_3y: number | null;
+  dividend_yield: number | null;
+  market_cap_cr: number | null;
+  book_value: number | null;
+  industry: string | null;
+  as_of: string | null;
+};
+
+type NewsItem = {
+  title: string;
+  source: string | null;
+  url: string | null;
+  published: string | null;
+  snippet: string | null;
+  origin: string;
+};
+
 type StockDetail = {
   symbol: string;
   name: string | null;
@@ -83,6 +106,8 @@ type StockDetail = {
   price_52w_low: number | null;
   dma_200: number | null;
   prices: PriceBar[];
+  fundamentals: Fundamentals | null;
+  news: NewsItem[];
   verdict: Verdict | null;
   lead_history: LeadHistoryRow[];
   holding: Holding | null;
@@ -188,6 +213,8 @@ export function Stock() {
   }
 
   const { verdict, holding, postmortem } = detail;
+  const fundamentals = detail.fundamentals;
+  const news = detail.news ?? [];
   const actionMeta = ACTION_META[(verdict?.action ?? "avoid").toLowerCase()] ?? ACTION_META.avoid;
   const isHeld = !!holding;
   const isClosed = !!postmortem && !isHeld;
@@ -398,6 +425,58 @@ export function Stock() {
               />
             </AreaChart>
           </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Fundamentals (Screener) */}
+      {fundamentals && (
+        <div className="mb-6">
+          <Section title="Fundamentals" icon="account_balance">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+              <FundCell label="P/E" value={fmt(fundamentals.pe, 1)} />
+              <FundCell label="ROE" value={fundamentals.roe != null ? `${fundamentals.roe.toFixed(1)}%` : "—"} />
+              <FundCell label="ROCE" value={fundamentals.roce != null ? `${fundamentals.roce.toFixed(1)}%` : "—"} />
+              <FundCell label="D/E" value={fmt(fundamentals.debt_to_equity, 2)} />
+              <FundCell label="Div yield" value={fundamentals.dividend_yield != null ? `${fundamentals.dividend_yield.toFixed(2)}%` : "—"} />
+              <FundCell label="Sales gr 3Y" value={fundamentals.sales_growth_3y != null ? `${fundamentals.sales_growth_3y.toFixed(0)}%` : "—"} />
+              <FundCell label="Profit gr 3Y" value={fundamentals.profit_growth_3y != null ? `${fundamentals.profit_growth_3y.toFixed(0)}%` : "—"} />
+              <FundCell label="Book value" value={fundamentals.book_value != null ? inr(fundamentals.book_value) : "—"} />
+              <FundCell label="Mkt cap" value={fundamentals.market_cap_cr != null ? `₹${Math.round(fundamentals.market_cap_cr).toLocaleString("en-IN")} Cr` : "—"} />
+              <FundCell label="Industry" value={fundamentals.industry ?? "—"} />
+            </div>
+            {fundamentals.as_of && (
+              <div className="text-[11px] text-on-surface-variant mt-3">
+                Source: Screener.in · as of {fundamentals.as_of.slice(0, 10)}
+              </div>
+            )}
+          </Section>
+        </div>
+      )}
+
+      {/* Recent news */}
+      {news.length > 0 && (
+        <div className="mb-6">
+          <Section title="Recent news" icon="newspaper">
+            <ul className="flex flex-col gap-2.5">
+              {news.map((n, i) => (
+                <li key={i}>
+                  <a
+                    href={n.url ?? "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-xl px-3.5 py-2.5 transition-colors hover:brightness-105 cursor-pointer"
+                    style={{ background: "var(--md-surface-container)" }}
+                  >
+                    <div className="text-[13.5px] font-medium text-on-surface leading-snug">{n.title}</div>
+                    <div className="text-[11px] text-on-surface-variant mt-1 flex items-center gap-1.5">
+                      <span>{n.source ?? "News"}</span>
+                      {n.published && <span>· {n.published.slice(0, 16)}</span>}
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </Section>
         </div>
       )}
 
@@ -630,6 +709,15 @@ function Section({ title, icon, children }: { title: string; icon: string; child
         <span className="text-[12.5px] font-semibold uppercase tracking-wide text-on-surface-variant">{title}</span>
       </div>
       {children}
+    </div>
+  );
+}
+
+function FundCell({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="px-3 py-2.5 rounded-xl" style={{ background: "var(--md-surface-container)" }}>
+      <div className="text-[11px] text-on-surface-variant mb-0.5">{label}</div>
+      <div className="font-mono text-[13.5px] font-semibold truncate" title={value}>{value}</div>
     </div>
   );
 }

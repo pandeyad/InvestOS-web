@@ -12,6 +12,8 @@ type StockScore = {
   rsi_14: number | null;
   mom_12_1: number | null;
   mom_3m: number | null;
+  pe: number | null;
+  roe: number | null;
   action: string | null; // "buy" | "watch" | "avoid" | null
   conviction: number | null;
   rationale: string | null;
@@ -361,7 +363,11 @@ function LeadCard({ s, i, onClick }: { s: StockScore; i: number; onClick: () => 
               <span className="material-symbols-rounded" style={{ fontSize: 13 }}>north_east</span>Long
             </span>
           </div>
-          <div className="text-[12.5px] text-on-surface-variant mt-0.5">{s.sector ?? "—"}</div>
+          <div className="text-[12.5px] text-on-surface-variant mt-0.5 flex items-center gap-2">
+            <span>{s.sector ?? "—"}</span>
+            {s.pe != null && <span className="opacity-70">· PE {s.pe.toFixed(0)}</span>}
+            {s.roe != null && <span className="opacity-70">· ROE {s.roe.toFixed(0)}%</span>}
+          </div>
         </div>
         {statusStyle && (
           <span className="px-3 py-1 rounded-full text-[12px] font-semibold flex-none"

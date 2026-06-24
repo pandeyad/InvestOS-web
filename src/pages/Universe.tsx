@@ -12,6 +12,8 @@ type UniverseStock = {
   rsi_14: number | null;
   mom_12_1: number | null;
   mom_3m: number | null;
+  pe: number | null;
+  roe: number | null;
   action: string | null; // "buy" | "watch" | "avoid" | null
   conviction: number | null;
   rationale: string | null;
@@ -263,6 +265,12 @@ function UniverseCard({ s, i, onClick }: { s: UniverseStock; i: number; onClick:
             {s.mom_12_1 != null ? `${s.mom_12_1 > 0 ? "+" : ""}${s.mom_12_1.toFixed(0)}` : "—"}
           </span>
         </span>
+        {(s.pe != null || s.roe != null) && (
+          <span className="flex items-center gap-1 ml-auto">
+            {s.pe != null && <span className="text-on-surface-variant">PE <span className="font-mono font-semibold text-on-surface">{s.pe.toFixed(0)}</span></span>}
+            {s.roe != null && <span className="text-on-surface-variant">ROE <span className="font-mono font-semibold text-on-surface">{s.roe.toFixed(0)}%</span></span>}
+          </span>
+        )}
       </div>
 
       {/* Sparkline */}
