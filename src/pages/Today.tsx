@@ -38,59 +38,10 @@ const STATUS_STYLES: Record<string, { bg: string; fg: string; label: string }> =
   pending: { bg: "var(--md-secondary-container)", fg: "var(--md-on-secondary-container)", label: "Pending" },
 };
 
-const ACTION_META: Record<string, { label: string; bg: string; fg: string; dot: string }> = {
-  buy: {
-    label: "Buy",
-    bg: "var(--md-primary-container)",
-    fg: "var(--md-on-primary-container)",
-    dot: "var(--md-primary)",
-  },
-  watch: {
-    label: "Watch",
-    bg: "var(--md-tertiary-container)",
-    fg: "var(--md-on-tertiary-container)",
-    dot: "var(--md-tertiary)",
-  },
-  avoid: {
-    label: "Skip",
-    bg: "var(--md-surface-container-high)",
-    fg: "var(--md-on-surface-variant)",
-    dot: "var(--md-outline)",
-  },
-};
-
-function ActionBadge({ action }: { action: string | null }) {
-  const key = action?.toLowerCase() ?? "avoid";
-  const meta = ACTION_META[key] ?? ACTION_META.avoid;
-  return (
-    <span
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold whitespace-nowrap"
-      style={{ background: meta.bg, color: meta.fg }}
-    >
-      <span
-        className="w-[6px] h-[6px] rounded-full flex-none"
-        style={{ background: meta.dot }}
-      />
-      {meta.label}
-    </span>
-  );
-}
-
-function pct(v: number | null, sign = false) {
-  if (v == null) return "—";
-  return `${sign && v > 0 ? "+" : ""}${v.toFixed(1)}%`;
-}
-
-function score(v: number | null) {
-  if (v == null) return "—";
-  return v.toFixed(0);
-}
-
 export function Today() {
   const navigate = useNavigate();
   const [data, setData] = useState<ScreenData | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "buy" | "watch">("all");
 
   useEffect(() => {
     api<ScreenData>("/public/screen/today")
@@ -105,10 +56,6 @@ export function Today() {
   const scores = data?.scores ?? [];
   const buys = scores.filter((s) => s.action === "buy").length;
   const watches = scores.filter((s) => s.action === "watch").length;
-
-  const visible = filter === "all"
-    ? scores
-    : scores.filter((s) => s.action === filter);
 
   const leads = scores.filter((s) => s.action === "buy");
 
@@ -137,28 +84,18 @@ export function Today() {
           </div>
         </div>
 
-        {/* Summary pills */}
+        {/* Summary counts + link to the full universe */}
         <div className="flex items-center gap-2.5 flex-wrap">
-          <SummaryPill
-            value={scores.length}
-            label="Screened"
-            active={filter === "all"}
-            onClick={() => setFilter("all")}
-          />
-          <SummaryPill
-            value={buys}
-            label="Buy"
-            active={filter === "buy"}
-            onClick={() => setFilter("buy")}
-            color="var(--md-primary)"
-          />
-          <SummaryPill
-            value={watches}
-            label="Watch"
-            active={filter === "watch"}
-            onClick={() => setFilter("watch")}
-            color="var(--md-tertiary)"
-          />
+          <SummaryPill value={buys} label="Buy" color="var(--md-primary)" />
+          <SummaryPill value={watches} label="Watch" color="var(--md-tertiary)" />
+          <button
+            onClick={() => navigate("/universe")}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold transition-all hover:brightness-105"
+            style={{ background: "var(--md-secondary-container)", color: "var(--md-on-secondary-container)" }}
+          >
+            Browse universe
+            <span className="material-symbols-rounded" style={{ fontSize: 17 }}>arrow_forward</span>
+          </button>
         </div>
       </div>
 
@@ -193,143 +130,44 @@ export function Today() {
         </div>
       )}
 
-      {visible.length > 0 && (
-        <>
-          <div className="flex items-baseline gap-2.5 mb-4">
-            <h2 className="md-title-large m-0 font-medium">Universe analysis</h2>
-            <span className="text-[13px] text-on-surface-variant">
-              {scores.length} stocks ranked by composite score
-            </span>
-          </div>
+      {leads.length === 0 && scores.length > 0 && (
         <div
-          className="bg-surface-container-lowest border rounded-2xl overflow-hidden shadow-card"
+          className="bg-surface-container-lowest border rounded-2xl p-8 text-center"
           style={{ borderColor: "var(--md-outline-variant)" }}
         >
-          {/* Table header */}
-          <div
-            className="grid text-[11.5px] font-semibold uppercase tracking-wide text-on-surface-variant px-5 py-3"
-            style={{
-              background: "var(--md-surface-container)",
-              gridTemplateColumns: "1.6fr 1fr 70px 80px 60px 60px 80px 80px",
-              gap: "12px",
-            }}
-          >
-            <span>Stock</span>
-            <span className="hidden md:block">Sector</span>
-            <span className="text-center">Score</span>
-            <span className="text-center">Action</span>
-            <span className="hidden sm:block text-right">RSI</span>
-            <span className="hidden sm:block text-right">Mom 12M</span>
-            <span className="hidden lg:block text-right">Stop %</span>
-            <span className="hidden lg:block text-right">Target %</span>
+          <div className="md-title-medium mb-1">No buy signals today</div>
+          <div className="text-[13px] text-on-surface-variant mb-4 max-w-md mx-auto">
+            The screen ran but flagged nothing as a buy. Browse the full ranked
+            universe to see everything it looked at.
           </div>
-
-          {visible.map((s, i) => {
-            const isBuy = s.action === "buy";
-            return (
-              <div
-                key={s.symbol}
-                className="grid px-5 py-3.5 border-t items-center cursor-pointer animate-row-in transition-colors"
-                style={{
-                  borderColor: "var(--md-outline-variant)",
-                  animationDelay: `${i * 25}ms`,
-                  gridTemplateColumns: "1.6fr 1fr 70px 80px 60px 60px 80px 80px",
-                  gap: "12px",
-                  background: isBuy ? "color-mix(in srgb, var(--md-primary-container) 18%, transparent)" : "transparent",
-                }}
-                onClick={() => navigate(`/stock/${s.symbol}?from=today`)}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--md-surface-container)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = isBuy ? "color-mix(in srgb, var(--md-primary-container) 18%, transparent)" : "transparent")}
-              >
-                {/* Stock */}
-                <div className="min-w-0">
-                  <div className="font-mono text-[15px] font-semibold leading-tight">{s.symbol}</div>
-                  <div className="text-[11.5px] text-on-surface-variant truncate mt-0.5">
-                    {s.name ?? ""}
-                  </div>
-                </div>
-
-                {/* Sector */}
-                <div className="hidden md:block text-[12.5px] text-on-surface-variant truncate">
-                  {s.sector ?? "—"}
-                </div>
-
-                {/* Score */}
-                <div className="text-center">
-                  <span
-                    className="inline-block font-mono text-[13px] font-semibold px-2 py-0.5 rounded-lg"
-                    style={{
-                      background: scoreColor(s.composite_score),
-                      color: "var(--md-on-surface)",
-                    }}
-                  >
-                    {score(s.composite_score)}
-                  </span>
-                </div>
-
-                {/* Action badge */}
-                <div className="text-center">
-                  <ActionBadge action={s.action} />
-                </div>
-
-                {/* RSI */}
-                <div
-                  className="hidden sm:block text-right font-mono text-[13px]"
-                  style={{ color: rsiColor(s.rsi_14) }}
-                >
-                  {s.rsi_14?.toFixed(0) ?? "—"}
-                </div>
-
-                {/* 12M Mom */}
-                <div
-                  className="hidden sm:block text-right font-mono text-[13px]"
-                  style={{ color: s.mom_12_1 != null ? (s.mom_12_1 > 0 ? "var(--md-success)" : "var(--md-error)") : undefined }}
-                >
-                  {pct(s.mom_12_1, true)}
-                </div>
-
-                {/* Stop % */}
-                <div className="hidden lg:block text-right font-mono text-[13px]" style={{ color: "var(--md-error)" }}>
-                  {isBuy ? pct(s.stop_pct) : "—"}
-                </div>
-
-                {/* Target % */}
-                <div className="hidden lg:block text-right font-mono text-[13px]" style={{ color: "var(--md-success)" }}>
-                  {isBuy ? pct(s.target_pct, true) : "—"}
-                </div>
-              </div>
-            );
-          })}
+          <button
+            onClick={() => navigate("/universe")}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold"
+            style={{ background: "var(--md-secondary-container)", color: "var(--md-on-secondary-container)" }}
+          >
+            Browse universe
+            <span className="material-symbols-rounded" style={{ fontSize: 17 }}>arrow_forward</span>
+          </button>
         </div>
-        </>
       )}
 
       <p className="text-[11.5px] text-on-surface-variant mt-5 leading-relaxed">
-        Tap any row to see the full analysis, 200-day chart, and rationale.
+        Tap any pick to see the full analysis, 200-day chart, and rationale.
         This is a personal trading journal — not investment advice.
       </p>
     </div>
   );
 }
 
-function SummaryPill({
-  value, label, active, onClick, color,
-}: {
-  value: number; label: string; active: boolean; onClick: () => void; color?: string;
-}) {
+function SummaryPill({ value, label, color }: { value: number; label: string; color?: string }) {
   return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold transition-all"
-      style={
-        active
-          ? { background: "var(--md-primary)", color: "var(--md-on-primary)" }
-          : { background: "var(--md-surface-container)", color: color ?? "var(--md-on-surface-variant)" }
-      }
+    <span
+      className="flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold"
+      style={{ background: "var(--md-surface-container)", color: color ?? "var(--md-on-surface-variant)" }}
     >
       <span className="font-mono text-[15px]">{value}</span>
       {label}
-    </button>
+    </span>
   );
 }
 
@@ -442,16 +280,3 @@ function EmptyState({ icon, title, subtitle }: { icon: string; title: string; su
   );
 }
 
-function scoreColor(v: number | null): string {
-  if (v == null) return "var(--md-surface-container-high)";
-  if (v >= 70) return "color-mix(in srgb, var(--md-primary-container) 80%, transparent)";
-  if (v >= 50) return "var(--md-surface-container-high)";
-  return "var(--md-surface-container-high)";
-}
-
-function rsiColor(v: number | null): string {
-  if (v == null) return "var(--md-on-surface-variant)";
-  if (v > 70) return "var(--md-error)";
-  if (v < 40) return "var(--md-tertiary)";
-  return "var(--md-on-surface)";
-}
