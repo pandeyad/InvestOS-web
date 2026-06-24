@@ -388,6 +388,14 @@ function LeadCard({ s, i, onClick }: { s: StockScore; i: number; onClick: () => 
         </div>
       </div>
 
+      {(s.lead_status === "placed" || s.lead_status === "filled") && (
+        <div className="flex items-center gap-1.5 mb-3.5 px-3 py-2 rounded-xl text-[12px] font-medium"
+          style={{ background: "var(--md-success-container)", color: "var(--md-success)" }}>
+          <span className="material-symbols-rounded" style={{ fontSize: 16 }}>verified_user</span>
+          Order {s.lead_status} · stop-loss &amp; target GTT active
+        </div>
+      )}
+
       <div className="flex items-center gap-2.5 mb-3.5">
         <span className="text-[12px] text-on-surface-variant whitespace-nowrap">Conviction</span>
         <div className="flex-1 h-[7px] rounded-full overflow-hidden" style={{ background: "var(--md-surface-container-high)" }}>
