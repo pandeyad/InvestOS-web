@@ -30,7 +30,7 @@ type Status = {
   last_gtt_reconcile: unknown;
   holdings_without_gtt: string[];
   chase: ChaseStatus | null;
-  autobuy: { enabled: boolean; paused: boolean; active: boolean } | null;
+  autobuy: { enabled: boolean; active: boolean } | null;
 };
 
 function ActionCard({
@@ -145,12 +145,12 @@ export function Control() {
     }
   }
 
-  async function toggleAutobuy(action: "pause" | "resume") {
-    setAutobuyMsg(`${action === "pause" ? "Pausing" : "Resuming"}…`);
+  async function toggleAutobuy(action: "enable" | "disable") {
+    setAutobuyMsg(`${action === "enable" ? "Enabling" : "Disabling"}…`);
     try {
       await api(`/admin/autobuy/${action}`, { method: "POST" });
       await refreshStatus();
-      setAutobuyMsg(action === "pause" ? "Auto-buy paused" : "Auto-buy resumed");
+      setAutobuyMsg(action === "enable" ? "Auto-buy enabled" : "Auto-buy disabled");
     } catch (e) {
       setAutobuyMsg(`Failed: ${e}`);
     }
@@ -230,28 +230,25 @@ export function Control() {
             containerFg={status?.autobuy?.active ? "var(--md-success)" : "var(--md-on-error-container)"}
             title="Auto-buy (live orders)"
             subtitle={
-              !status?.autobuy?.enabled
-                ? "Disabled in env (INVESTOS_AUTO_EXECUTE_LEADS)"
-                : status?.autobuy?.paused
-                  ? "PAUSED — leads generate but no orders placed"
-                  : "ACTIVE — premarket run places real orders"
+              status?.autobuy?.enabled
+                ? "ACTIVE — premarket run places real orders"
+                : "DISABLED — leads generate but no orders placed"
             }
             msg={autobuyMsg}
           >
-            {status?.autobuy?.enabled && !status.autobuy.paused && (
+            {status?.autobuy?.enabled ? (
               <ActionBtn
-                onClick={() => toggleAutobuy("pause")}
+                onClick={() => toggleAutobuy("disable")}
                 variant="filled"
                 icon="pause_circle"
-                label="Pause auto-buy"
+                label="Disable auto-buy"
               />
-            )}
-            {status?.autobuy?.enabled && status.autobuy.paused && (
+            ) : (
               <ActionBtn
-                onClick={() => toggleAutobuy("resume")}
+                onClick={() => toggleAutobuy("enable")}
                 variant="tonal"
                 icon="play_circle"
-                label="Resume auto-buy"
+                label="Enable auto-buy"
               />
             )}
           </ActionCard>
