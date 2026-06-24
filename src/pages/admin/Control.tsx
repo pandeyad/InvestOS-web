@@ -30,6 +30,7 @@ type Status = {
   last_gtt_reconcile: unknown;
   holdings_without_gtt: string[];
   chase: ChaseStatus | null;
+  autobuy: { enabled: boolean; paused: boolean; active: boolean } | null;
 };
 
 function ActionCard({
@@ -123,14 +124,14 @@ export function Control() {
   const [backfillMsg, setBackfillMsg] = useState<string>("");
   const [status, setStatus] = useState<Status | null>(null);
 
+  const [autobuyMsg, setAutobuyMsg] = useState<string>("");
+
+  const refreshStatus = () =>
+    api<Status>("/status").then((r) => setStatus(r.data)).catch(() => {});
+
   useEffect(() => {
-    const tick = () => {
-      api<Status>("/status")
-        .then((r) => setStatus(r.data))
-        .catch(() => {});
-    };
-    tick();
-    const id = setInterval(tick, 15_000);
+    refreshStatus();
+    const id = setInterval(refreshStatus, 15_000);
     return () => clearInterval(id);
   }, []);
 
@@ -141,6 +142,17 @@ export function Control() {
       setter(`${label} ✓`);
     } catch (e) {
       setter(`${label} failed: ${e}`);
+    }
+  }
+
+  async function toggleAutobuy(action: "pause" | "resume") {
+    setAutobuyMsg(`${action === "pause" ? "Pausing" : "Resuming"}…`);
+    try {
+      await api(`/admin/autobuy/${action}`, { method: "POST" });
+      await refreshStatus();
+      setAutobuyMsg(action === "pause" ? "Auto-buy paused" : "Auto-buy resumed");
+    } catch (e) {
+      setAutobuyMsg(`Failed: ${e}`);
     }
   }
 
@@ -212,6 +224,38 @@ export function Control() {
       {/* Actions + status: stacked on mobile, side-by-side on md+ */}
       <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-[18px]">
         <div className="flex flex-col gap-3.5">
+          <ActionCard
+            icon="smart_toy"
+            containerColor={status?.autobuy?.active ? "var(--md-success-container)" : "var(--md-error-container)"}
+            containerFg={status?.autobuy?.active ? "var(--md-success)" : "var(--md-on-error-container)"}
+            title="Auto-buy (live orders)"
+            subtitle={
+              !status?.autobuy?.enabled
+                ? "Disabled in env (INVESTOS_AUTO_EXECUTE_LEADS)"
+                : status?.autobuy?.paused
+                  ? "PAUSED — leads generate but no orders placed"
+                  : "ACTIVE — premarket run places real orders"
+            }
+            msg={autobuyMsg}
+          >
+            {status?.autobuy?.enabled && !status.autobuy.paused && (
+              <ActionBtn
+                onClick={() => toggleAutobuy("pause")}
+                variant="filled"
+                icon="pause_circle"
+                label="Pause auto-buy"
+              />
+            )}
+            {status?.autobuy?.enabled && status.autobuy.paused && (
+              <ActionBtn
+                onClick={() => toggleAutobuy("resume")}
+                variant="tonal"
+                icon="play_circle"
+                label="Resume auto-buy"
+              />
+            )}
+          </ActionCard>
+
           <ActionCard
             icon="rocket_launch"
             containerColor="var(--md-primary-container)"
