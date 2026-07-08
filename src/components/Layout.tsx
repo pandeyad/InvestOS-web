@@ -22,6 +22,7 @@ const NAV_ADMIN: NavItem[] = [
   { to: "/admin/broker", label: "Broker", icon: "hub" },
   { to: "/admin/control", label: "Control", icon: "tune" },
   { to: "/lessons", label: "Lessons", icon: "menu_book" },
+  { to: "/retro", label: "Retrospective", icon: "insights" },
 ];
 
 // Desktop pill nav item

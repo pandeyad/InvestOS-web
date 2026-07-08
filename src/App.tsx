@@ -7,6 +7,7 @@ import { Universe } from "@/pages/Universe";
 import { History } from "@/pages/History";
 import { Leaderboard } from "@/pages/Leaderboard";
 import { Lessons } from "@/pages/Lessons";
+import { Retro } from "@/pages/Retro";
 import { TipJar } from "@/pages/TipJar";
 import { About } from "@/pages/About";
 import { Subscribe } from "@/pages/Subscribe";
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
         <Route path="/leaderboard" element={<RequireAuth><Leaderboard /></RequireAuth>} />
         <Route path="/lessons" element={<RequireAdmin><Lessons /></RequireAdmin>} />
+        <Route path="/retro" element={<RequireAdmin><Retro /></RequireAdmin>} />
         <Route path="/tip-jar" element={<TipJar />} />
         <Route path="/subscribe" element={<Subscribe />} />
         <Route path="/stock/:symbol" element={<RequireAuth><Stock /></RequireAuth>} />
