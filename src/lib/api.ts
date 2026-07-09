@@ -42,11 +42,24 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<Enve
   });
 
   if (res.status === 401) {
-    // Redirect to backend OAuth flow; come back to current page.
+    // Session (Google's ~1h id_token) expired. Try a SILENT re-auth first
+    // (prompt=none) so an active Google session renews without an account
+    // chooser. A one-shot flag prevents a redirect loop: if the silent attempt
+    // already ran and we're still 401, fall back to interactive login.
     const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
-    window.location.href = `${BASE}/auth/google/login?return_to=${returnTo}`;
+    const triedSilent = sessionStorage.getItem("silent_reauth") === "1";
+    if (triedSilent) {
+      sessionStorage.removeItem("silent_reauth");
+      window.location.href = `${BASE}/auth/google/login?return_to=${returnTo}`;
+    } else {
+      sessionStorage.setItem("silent_reauth", "1");
+      window.location.href = `${BASE}/auth/google/login?silent=1&return_to=${returnTo}`;
+    }
     throw new HttpError(401, "redirecting to login");
   }
+  // Any successful (or non-401) response means the session is valid — clear the
+  // one-shot so the NEXT expiry gets a fresh silent attempt.
+  sessionStorage.removeItem("silent_reauth");
   if (!res.ok) {
     throw new HttpError(res.status, await res.text());
   }
