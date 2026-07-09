@@ -93,14 +93,14 @@ export function About() {
         className="bg-surface-container-low border rounded-2xl px-5 mb-8"
         style={{ borderColor: "var(--md-outline-variant)" }}
       >
-        <TechRow label="Backend" value="Python · FastAPI · SQLAlchemy async · SQLite" />
+        <TechRow label="Backend" value="Python · FastAPI · SQLAlchemy async · MySQL" />
         <TechRow label="Scheduling" value="APScheduler · Asia/Kolkata timezone" />
         <TechRow label="Market data" value="NSE bhavcopy · NSE indices archive · Screener.in · Tickertape" />
         <TechRow label="Broker" value="Kite Connect (Zerodha) · KiteConnect Python SDK" />
         <TechRow label="LLM" value="Gemini (default) · Claude · provider-agnostic CLI router" />
         <TechRow label="Frontend" value="React 19 · Vite · Tailwind · react-router-dom v7" />
         <TechRow label="Auth" value="Google OAuth 2.0 · HttpOnly cookies · no stored passwords" />
-        <TechRow label="Hosting" value="Vercel (frontend) · VPS Mumbai (backend) · DuckDNS + Caddy" />
+        <TechRow label="Hosting" value="whatibought.in — Vercel (frontend) · India VPS + Caddy (backend)" />
       </div>
 
       {/* GitHub */}

@@ -1,6 +1,6 @@
 # InvestOS-web
 
-Public read-only frontend for the InvestOS algorithmic trading journal. Vite + React 19 + Tailwind + Material Symbols. Deployed to Vercel (free tier).
+Public read-only frontend for the InvestOS algorithmic trading journal. Vite + React 19 + Tailwind + Material Symbols. Deployed to Vercel (Hobby).
 
 **Zero secrets in this repo.** All auth (Google OAuth + session cookie) lives on the InvestOS backend, reached via Vercel's same-origin rewrite proxy.
 
@@ -9,29 +9,24 @@ Public read-only frontend for the InvestOS algorithmic trading journal. Vite + R
 ## Architecture (₹0/yr)
 
 ```
-Browser → https://investos.vercel.app           (this app, Vercel Hobby)
+Browser → https://whatibought.in                 (this app, Vercel Hobby)
               │
               │ same-origin /api/*
               ▼
         Vercel rewrites internally
               │
               ▼
-        https://investos.duckdns.org            (Caddy, Let's Encrypt, free)
+        https://api.whatibought.in               (Caddy, Let's Encrypt, free)
               │
               ▼
-        Contabo VPS Mumbai :8000 (FastAPI + Kite + APScheduler)
+        India VPS :8000 (FastAPI + Kite + APScheduler)
 ```
 
-The browser only ever sees `investos.vercel.app`. Same-origin cookies, no CORS preflight, no `SameSite=None`.
+The browser only ever sees `whatibought.in`. Same-origin cookies, no CORS preflight, no `SameSite=None`. `investos.duckdns.org` is kept as a fallback for `api`.
 
-```json
-{
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "https://investos.duckdns.org/:path*" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}
-```
+In production `VITE_API_BASE=/api`; the `/api/* → https://api.whatibought.in/*`
+rewrite (and the SPA fallback to `index.html`) are configured in the Vercel project
+settings. In dev, `VITE_API_BASE=http://localhost:8000` talks to FastAPI directly.
 
 ---
 
@@ -40,21 +35,23 @@ The browser only ever sees `investos.vercel.app`. Same-origin cookies, no CORS p
 | Route | Auth | What it shows |
 |---|---|---|
 | `/` | Public | Landing page + Google sign-in |
-| `/today` | Viewer + Admin | Today's leads — direction, conviction, stop %, target % (no rupee amounts) |
-| `/history` | Viewer + Admin | Lead history with 7 / 30 / 90 / 365 day windows, equity curve, per-lead cards |
+| `/today` | Viewer + Admin | Today's picks — direction, conviction, stop %, target % (no rupee amounts) |
+| `/universe` | Viewer + Admin | Full ranked universe with per-stock factors, fundamentals, news |
+| `/history` | Viewer + Admin | Pick history with 7 / 30 / 90 / 365 day windows, equity curve, per-pick cards |
 | `/leaderboard` | Viewer + Admin | Win rate gauge, per-stock return stats, aggregate performance |
-| `/lessons` | Viewer + Admin | LLM-distilled trading rules extracted from closed trades |
-| `/tip-jar` | Public | UPI QR + buy-me-a-coffee |
-| `/about` | Public | System journey, disclaimer, tech stack |
-| `/subscribe` | Public | How to get read access |
+| `/tip-jar` | Public | UPI handle + support links |
+| `/about` | Viewer + Admin | System overview, disclaimer, tech stack |
+| `/subscribe` | Public | How to get notified of new picks |
 | `/admin` | Admin only | Portfolio dashboard — capital breakdown, live holdings, open GTTs |
 | `/admin/postmortems` | Admin only | Raw LLM post-mortems per trade |
 | `/admin/broker` | Admin only | Kite connection status, manual token refresh |
 | `/admin/control` | Admin only | Manual pipeline trigger, chase start/stop, system status |
+| `/lessons` | Admin only | LLM-distilled trading rules extracted from closed trades |
+| `/retro` | Admin only | Daily system retrospective — market card, selection scorecard, missed winners, LLM narrative |
 
-**Auth tiers:**
+**Auth tiers** (role derived per request from env — no role stored in the DB):
 - **Public**: no login needed
-- **Viewer**: any Google account allowlisted via `INVESTOS_VIEWER_EMAILS`
+- **Viewer**: any signed-in Google account
 - **Admin**: Google accounts in `INVESTOS_ADMIN_EMAILS` — sees full INR amounts, quantities, and admin routes
 
 ---
@@ -62,53 +59,41 @@ The browser only ever sees `investos.vercel.app`. Same-origin cookies, no CORS p
 ## Features
 
 ### Viewer-facing (anonymized — no INR amounts or quantities)
-- **Today's leads** — real-time view of each day's shortlist: direction (LONG/SHORT), conviction score (0-100), stop % and target %, status (pending / executed / skipped). Prices and sizes never shown.
-- **Equity curve** — SVG chart of cumulative returns over time, responsive across all screen sizes via `viewBox`.
-- **Lead history** — filterable by time window; expandable cards with regime context, LLM verdict summary, and outcome.
-- **Leaderboard** — win rate gauge, 3-column per-stock stats table (avg return, win %, trades), best/worst trade.
-- **Lessons** — numbered rulebook distilled by the LLM from post-mortems of closed trades. Updated after each losing trade.
+- **Today's picks** — each day's shortlist: direction (LONG/SHORT), conviction (0–1), stop % and target %, status. Prices and sizes never shown.
+- **Equity curve** — cumulative % return over time vs. the NIFTY benchmark (recharts).
+- **Pick history** — filterable by time window; expandable cards with regime context and outcome.
+- **Leaderboard** — win rate gauge, per-stock stats table, best/worst trade.
 
 ### Admin-only (full context)
-- **Capital breakdown** — live INR values from Kite: available cash, invested, current value, P&L %, total portfolio.
-- **Holdings table** — all open positions with qty, avg buy price, last price, allocation %.
-- **GTT status** — open GTTs with stop/target prices and status.
-- **Post-mortems** — raw per-trade LLM analysis with entry rationale, what went wrong, rule update.
-- **Broker status** — Kite API health, access token age, auto-login status.
-- **Manual triggers** — run premarket pipeline on demand, start/stop the intraday trailing-stop chase loop.
+- **Capital breakdown** — live INR values from Kite: available cash, invested, current value, P&L %.
+- **Holdings + GTT status** — open positions and their active stop/target GTTs.
+- **Post-mortems** — raw per-trade LLM analysis; **Lessons** — the distilled rulebook.
+- **Retrospective** — the system grading itself daily (breadth, sector rotation, missed winners, picks-vs-rejects edge, fast-stress + defensive-sleeve stats).
+- **Broker status** + **manual triggers** — Kite health, run premarket on demand, start/stop the chase loop.
 
 ---
 
 ## Design system
 
 **Ember Material** — custom Tailwind + Material Symbols theme:
-- CSS variables for all colors: `--color-primary`, `--color-surface-*`, `--color-on-surface`, `--color-success`, `--color-error`
-- Material Symbols Outlined icon font (variable: `wght 300`, `opsz 20`)
+- CSS variables for all colors (`--md-primary`, `--md-surface-*`, `--md-on-surface`, `--md-error`, …)
+- Material Symbols Rounded icon font (`<span className="material-symbols-rounded">`)
 - Card-level animations: `animate-card-in`, `animate-row-in` with staggered delays
-- Typography: Inter (variable) for body, `font-display` for hero headings
-
-**Responsive breakpoints** (Tailwind defaults):
-- `sm:` 640px — 2-column card grids, wider padding
-- `md:` 768px — full table columns, multi-column layouts, sidebar grids
-- `lg:` 1024px — 4-column capital card grid
-
-Tables collapse to 2-column (symbol + key metric) on mobile and expand to full columns at `md:`.
+- Typography: Inter (variable) for body, `md-headline-*` / `md-title-*` / `md-body-*` scale
 
 ---
 
 ## Guardrails for design changes
 
-When using Claude Design or any AI tool to update this UI, follow these rules:
-
-1. **Never expose INR amounts or position sizes to non-admin routes.** The anonymization boundary is `role === "admin"` — viewer routes show only percentages and direction.
-2. **Color system is via CSS variables only** — never hardcode hex colors. Use `text-on-surface`, `bg-surface-1`, `bg-surface-2`, `text-primary` etc. from `index.css`.
-3. **Icons must use Material Symbols** (`<span className="material-symbols-outlined">`). Do not introduce Heroicons, Lucide, or other icon libraries.
-4. **No new external dependencies** unless discussed. The app intentionally has minimal deps: React, Tailwind, Vite, react-router-dom.
-5. **Table collapse pattern**: on mobile, show Symbol + one key metric; hide other columns with `hidden md:block`. Do not use horizontal scroll for data tables.
-6. **SVG charts**: always set `viewBox` + `width="100%"` for responsiveness. Never hardcode pixel widths without a `viewBox`.
-7. **Auth gates stay**: every admin page wraps in an `isAdmin` check. Never remove or relax these.
-8. **No state management library** — all server state is fetched directly with `useState` + `useEffect`. Keep it simple.
-9. **`/api/*` prefix** for all backend calls — the Vercel rewrite depends on this. Never hardcode `http://localhost:8000` in production paths; use `import.meta.env.VITE_API_BASE`.
-10. **Stick to existing page structure** — the Layout, nav, and route definitions in `App.tsx` are the contract. New pages must register in `App.tsx` and appear in `Layout.tsx` nav for the appropriate role.
+1. **Never expose INR amounts or position sizes to non-admin routes.** The anonymization boundary is `role === "admin"`; viewer routes show only percentages and direction. The backend enforces this too via `projections.py` (CI-gated).
+2. **Color system is via CSS variables only** — never hardcode hex. Use the `--md-*` tokens.
+3. **Icons must use Material Symbols Rounded.** No Heroicons/Lucide/etc.
+4. **Keep deps minimal.** Current runtime deps: React, react-router-dom, recharts (charts), `@vercel/analytics`. Discuss before adding more.
+5. **SVG/recharts charts**: responsive containers only — never hardcode pixel widths.
+6. **Auth gates stay**: every admin page wraps in `RequireAdmin`. Never relax these.
+7. **No state management library** — server state via `useState` + `useEffect` through `src/lib/api.ts`.
+8. **`/api/*` prefix** for all backend calls (the Vercel rewrite depends on it); use `import.meta.env.VITE_API_BASE`.
+9. **Stick to the route contract** — new pages register in `App.tsx` and appear in `Layout.tsx` nav for the right role.
 
 ---
 
@@ -130,24 +115,15 @@ INVESTOS_COOKIE_SECURE=false
 
 ---
 
-## Vercel deploy
+## Deploy
 
-```bash
-npm install -g vercel
-vercel login
-vercel link
-
-# Production env: relative path → triggers rewrite
-vercel env add VITE_API_BASE production
-# → enter: /api
-
-vercel deploy --prod
-```
-
-Edit `vercel.json` if your DuckDNS subdomain changes.
+Auto-deploys on push to `main` (Vercel Hobby, project linked to this repo). Production
+`VITE_API_BASE=/api` so calls go through the same-origin rewrite configured in the
+Vercel project settings. Web Analytics is enabled via `@vercel/analytics` (cookieless —
+no consent banner).
 
 ---
 
 ## Companion
 
-Backend: [InvestOS](../InvestOS) — FastAPI + Kite Connect + APScheduler on Contabo Mumbai, fronted by Caddy.
+Backend: [InvestOS](../InvestOS) — FastAPI + Kite Connect + APScheduler on an India VPS (`ovh1`), MySQL on a Tailscale-only Mumbai host, fronted by Caddy at `api.whatibought.in`.
