@@ -27,6 +27,10 @@ type Retro = {
   decliners: number | null;
   breadth_pct: number | null;
   pct_above_50dma: number | null;
+  stress: boolean | null;
+  vix_change: number | null;
+  sleeve_count: number | null;
+  sleeve_symbols: string[] | null;
   sector_rotation: SectorRet[] | null;
   leaders: Mover[] | null;
   laggards: Mover[] | null;
@@ -159,6 +163,45 @@ export function Retro() {
                 value={pct(retro.excess_vs_benchmark_pct)}
                 color={toneColor(retro.excess_vs_benchmark_pct)}
               />
+            </div>
+
+            {/* Regime & risk strip — fast-stress overlay + defensive sleeve */}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              {retro.stress ? (
+                <span
+                  className="inline-flex items-center gap-1.5 text-[12.5px] font-medium px-2.5 py-1 rounded-lg"
+                  style={{ background: "var(--md-error-container)", color: "var(--md-error)" }}
+                >
+                  <span className="material-symbols-rounded" style={{ fontSize: 16 }}>warning</span>
+                  Stress → next run defensive
+                </span>
+              ) : (
+                <span
+                  className="inline-flex items-center gap-1.5 text-[12.5px] px-2.5 py-1 rounded-lg"
+                  style={{ background: "var(--md-surface-container-high)", color: "var(--md-on-surface-variant)" }}
+                >
+                  <span className="material-symbols-rounded" style={{ fontSize: 16 }}>check_circle</span>
+                  No stress
+                </span>
+              )}
+              <span className="text-[12px] text-on-surface-variant">
+                day breadth {retro.breadth_pct != null ? `${retro.breadth_pct}%` : "—"} · NIFTY{" "}
+                {pct(retro.nifty_ret_pct)} · VIX{" "}
+                {retro.vix_change != null ? `${retro.vix_change > 0 ? "+" : ""}${retro.vix_change}` : "—"}
+              </span>
+              {retro.sleeve_count != null && retro.sleeve_count > 0 && (
+                <span
+                  className="inline-flex items-center gap-1.5 text-[12.5px] px-2.5 py-1 rounded-lg"
+                  style={{ background: "var(--md-primary-container)", color: "var(--md-primary)" }}
+                  title={(retro.sleeve_symbols || []).join(", ")}
+                >
+                  <span className="material-symbols-rounded" style={{ fontSize: 16 }}>shield</span>
+                  {retro.sleeve_count} large-cap sleeve
+                  {retro.sleeve_symbols && retro.sleeve_symbols.length > 0
+                    ? `: ${retro.sleeve_symbols.slice(0, 3).join(", ")}${retro.sleeve_symbols.length > 3 ? "…" : ""}`
+                    : ""}
+                </span>
+              )}
             </div>
 
             {retro.sector_rotation && retro.sector_rotation.length > 0 && (
