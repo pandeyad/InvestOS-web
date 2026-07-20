@@ -97,12 +97,45 @@ function Stat({ label, value, color }: { label: string; value: string; color?: s
   );
 }
 
+type Adjustment = {
+  param: string;
+  old: string | null;
+  new: string;
+  direction: string;
+  reason: string | null;
+  at: string | null;
+};
+type Autotune = {
+  enabled: boolean;
+  sleeve_max: number;
+  sleeve_max_default: number;
+  sleeve_max_bounds: [number, number];
+  recent_adjustments: Adjustment[];
+};
+
 export function Retro() {
   const [retro, setRetro] = useState<Retro | null | undefined>(undefined);
+  const [tune, setTune] = useState<Autotune | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const loadTune = () =>
+    api<Autotune>("/admin/autotune").then((r) => setTune(r.data)).catch(() => setTune(null));
 
   useEffect(() => {
     api<Retro | null>("/public/retro").then((r) => setRetro(r.data));
+    loadTune();
   }, []);
+
+  const toggleTune = async () => {
+    if (!tune) return;
+    setBusy(true);
+    try {
+      await api(`/admin/autotune/${tune.enabled ? "disable" : "enable"}`, { method: "POST" });
+      await loadTune();
+    } finally {
+      setBusy(false);
+    }
+  };
 
   if (retro === undefined)
     return <div className="max-w-[880px] mx-auto px-4 md:px-8 py-10 text-on-surface-variant">Loading…</div>;
@@ -221,6 +254,67 @@ export function Retro() {
               </div>
             )}
           </Card>
+
+          {/* Auto-tune — closes the loop: retro metrics → bounded param changes */}
+          {tune && (
+            <Card delay={60}>
+              <div className="flex items-center justify-between gap-3 mb-1">
+                <div className="md-title-medium">Auto-tune</div>
+                <button
+                  onClick={toggleTune}
+                  disabled={busy}
+                  className="text-[12.5px] font-medium px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                  style={{
+                    background: tune.enabled ? "var(--md-primary-container)" : "var(--md-surface-container-high)",
+                    color: tune.enabled ? "var(--md-primary)" : "var(--md-on-surface-variant)",
+                  }}
+                >
+                  {tune.enabled ? "● On — click to disable" : "○ Off — click to enable"}
+                </button>
+              </div>
+              <div className="text-[12.5px] text-on-surface-variant mb-3">
+                When on, the retro's measured selection quality nudges the funnel's runtime
+                parameters — bounded, rate-limited, auto-reverted on regression.
+              </div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-[12px] text-on-surface-variant">Large-cap sleeve width</span>
+                <span className="md-title-medium tabular-nums">{tune.sleeve_max}</span>
+                <span className="text-[11.5px] text-on-surface-variant">
+                  (default {tune.sleeve_max_default}, bounds {tune.sleeve_max_bounds[0]}–{tune.sleeve_max_bounds[1]})
+                </span>
+              </div>
+              {tune.recent_adjustments.length === 0 ? (
+                <div className="text-[12.5px] text-on-surface-variant">No adjustments yet.</div>
+              ) : (
+                tune.recent_adjustments.map((a, j) => (
+                  <div
+                    key={j}
+                    className="flex items-start gap-2.5 py-2 border-t"
+                    style={{ borderColor: "var(--md-outline-variant)" }}
+                  >
+                    <span
+                      className="material-symbols-rounded flex-none"
+                      style={{
+                        fontSize: 18,
+                        color: a.direction === "revert" ? "var(--md-error)" : "var(--md-primary)",
+                      }}
+                    >
+                      {a.direction === "up" ? "trending_up" : a.direction === "down" ? "trending_down" : "undo"}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-[13px]">
+                        <code>{a.param}</code> {a.old}→{a.new}
+                        <span className="text-on-surface-variant"> · {a.at?.slice(0, 10)}</span>
+                      </div>
+                      {a.reason && (
+                        <div className="text-[12px] text-on-surface-variant">{a.reason}</div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </Card>
+          )}
 
           {/* Narrative + system lesson */}
           {(retro.narrative || retro.system_lesson) && (
